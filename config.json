@@ -1,0 +1,548 @@
+{
+  "name": "AlgoNet",
+  "version": "1.0.0",
+  "random_seed": 42,
+  "logging": {
+		"filename": "logs/run.log",
+		"filemode": "w",
+		"level": "debug"
+  },
+  "extraction": {},
+  "sources": {
+    "codeforces": {
+      "type": ["text", "code"]
+    },
+    "kattis": {
+      "type": ["text"]
+    },
+    "uva": {
+      "type": ["text"]
+    },
+    "infoarena": {
+      "type": ["code"]
+    },
+    "upb": {
+      "type": ["code"]
+    }
+  },
+  "preprocess": {
+    "text": {
+      "fields": {
+        "statement": true,
+        "input": true,
+        "output": true
+      },
+      "digit_parser": true,
+      "formula_parser": true
+    },
+    "code": {
+      "clang": false
+    },
+    "tags": {
+        "fft": "math",
+        "chinese remainder theorem": "math",
+        "geometry": "math",
+        "probabilities": "math",
+        "number theory": "math",
+        "hashing": "data structures",
+        "flows": "graphs",
+        "flow": "graphs",
+        "dfs and similar": "graphs",
+        "shortest paths": "graphs",
+        "shortest path": "graphs",
+        "trees": "graphs",
+        "graph matchings": "graphs",
+        "dsu": "data structures",
+        "string suffix structures": "data structures",
+        "binary search": "divide and conquer",
+        "ternary search": "divide and conquer",
+        "dp": "dp & greedy",
+        "greedy": "dp & greedy",
+        "dijkstra": "graphs",
+        "reachability": "graphs",
+        "all pairs": "graphs",
+        "mst": "graphs",
+        "knapsack": "graphs",
+        "dag": "graphs",
+        "flood fill": "graphs",
+        "bst": "data structures",
+        "suffix tree": "data structures",
+        "topsort": "graphs",
+        "graph": "graphs",
+        "lca": "graphs",
+        "kuhn": "graphs",
+        "tsp": "graphs"
+    },
+    "tags_keywords": {
+      "graphs": [
+        "bellman_ford",
+        "bellmanford",
+        "dijkstra",
+        "djikstra",
+        "tarjan",
+        "lca",
+        "bfs",
+        "dfs",
+        "roy_floyd",
+        "royfloyd",
+        "max_flow",
+        "maxflow",
+        "minCut",
+        "mst",
+        "kruskal",
+        "conex",
+        "kuhn"
+      ],
+      "divide and conquer": [
+        "binarysearch",
+        "bsearch",
+        "upper_bound",
+        "lower_bound",
+        "cautbin"
+      ],
+      "geometry": [
+        "convex",
+        "polygon",
+        "poligon",
+        "intersection",
+        "coliniar",
+        "trigono",
+        "sinus",
+        "cosinus"
+      ],
+      "strings": [
+        "rabin",
+        "karp",
+        "kmp"
+      ],
+      "data structures": [
+        "aib",
+        "segment",
+        "trie",
+        "aint"
+      ],
+      "dp": [
+        " dp[",
+        "dinamica"
+      ]
+    }
+  },
+  "split": {
+    "percentage": 0.15,
+    "random_seed": 42,
+    "labels": ["math", "implementation", "graphs", "dp & greedy"]
+  },
+  "pretrain": {
+    "scenario": "w2v_text"
+  },
+  "prepare_input": {},
+  "extract_embeddings": {
+    "split": "train"
+  },
+  "load_weights_from_epoch": false,
+  "model": "AlgoNetCode",
+  "train": {
+    "callbacks": [
+      "early_stopping",
+      "checkpoint"
+    ],
+    "num_epochs": 10,
+    "batch_size": 128,
+    "extra_supervision": false,
+    "only_cf": false,
+    "debug": false
+  },
+  "test": {
+    "threshold": 0.4
+  },
+  "callbacks": {
+    "early_stopping": {
+      "patience": 2,
+      "verbose": 1,
+      "min_delta": 0.001,
+      "mode": "auto",
+      "monitor": "val_loss"
+    },
+    "checkpoint": {
+      "mode": "auto",
+      "save_best_only": true,
+      "monitor": "val_loss",
+      "verbose": 1
+    }
+  },
+  "embeddings": {
+    "framework":{
+      "word2vec": {
+        "size": 100,
+        "window": 5,
+        "min_count": 3,
+        "workers": 32
+      },
+      "ast": {
+
+      }
+    },
+    "w2v_text": {
+      "emb_type": "word2vec",
+      "input_type": "text"
+    },
+    "w2v_cnn_text": {
+      "emb_type": "word2vec",
+      "input_type": "text"
+    },
+    "w2v_code_tokens": {
+      "emb_type": "word2vec",
+      "input_type": "tokens"
+    },
+    "w2v_code_symbs": {
+      "emb_type": "word2vec",
+      "input_type": "symbs"
+    },
+    "safe": {
+      "emb_type": "safe",
+      "input_type": "code"
+    },
+    "code2vec": {
+      "emb_type": "ast",
+      "input_type": "ast"
+    }
+  },
+  "encoders": {
+    "lstm": {
+      "hidden_size": 100,
+      "dropout": 0.2,
+      "regularizer": 0.01,
+      "max_seq_len": 250,
+      "max_seq_len_text": 250,
+      "max_seq_len_code_tokens": 745,
+      "max_seq_len_code_symbs": 900,
+      "attention": true,
+      "masking": true
+    },
+    "gru": {
+      "hidden_size": 100,
+      "dropout": 0.2,
+      "regularizer": 0.01,
+      "max_seq_len": 250,
+      "max_seq_len_text": 250,
+      "max_seq_len_code_tokens": 745,
+      "max_seq_len_code_symbs": 900,
+      "attention": true,
+      "masking": true
+    },
+    "small_lstm": {
+      "hidden_size": 100,
+      "dropout": 0.2,
+      "regularizer": false,
+      "max_seq_len": 25,
+      "attention": true,
+      "masking": true,
+      "default_input_size": 100,
+      "dtype": "float32"
+    },
+    "ast": {
+      "max_seq_len": 200,
+      "default_input_size": 1,
+      "path_emb_size": 128,
+      "token_emb_size": 128,
+      "token_vocab_size": 46295,
+      "path_vocab_size": 272859,
+      "dtype": "int32",
+      "dropout": 0.1
+    },
+    "cnn": {
+      "kernel_sizes": [3, 4, 5],
+      "kernel_num": 512,
+      "max_seq_len": 250,
+      "max_seq_len_text": 250
+    }
+  },
+  "join": {
+    "ast": {
+      "code_vector_size": 100
+    }
+  },
+  "classifier": {
+    "default_dense": {
+      "dropout": 0.1,
+      "dense": [64],
+      "activation": "relu",
+      "regularizer": 0.01
+    },
+    "problem_emb": {
+      "dropout": 0.1,
+      "dense": [64],
+      "activation": "relu",
+      "regularizer": 0.01
+    },
+    "cherry": {
+      "dropout": 0.1,
+      "dense": [4],
+      "activation": "sigmoid",
+      "regularizer": 0.01
+    },
+    "apple": {
+      "dropout": 0.01,
+      "dense": [4],
+      "activation": "sigmoid",
+      "regularizer": 0.01
+    }
+  },
+  "models": {
+    "AlgoNetText": {
+      "encoders": {
+        "input_type": "text",
+        "inputs": [
+          {
+            "scenario": "w2v_text",
+            "field": "statement",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "w2v_text",
+            "field": "input",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "w2v_text",
+            "field": "output",
+            "encoder": "lstm"
+          }
+        ],
+        "join_operation": "default"
+      },
+      "classifiers": ["cherry"],
+      "optimizer": "adam",
+      "metrics": ["accuracy"],
+      "loss": "binary_crossentropy"
+    },
+    "EMNLP": {
+      "encoders": {
+        "input_type": "text",
+        "inputs": [
+          {
+            "scenario": "w2v_cnn_text",
+            "field": "statement",
+            "encoder": "cnn"
+          },
+          {
+            "scenario": "w2v_cnn_text",
+            "field": "input",
+            "encoder": "cnn"
+          },
+          {
+            "scenario": "w2v_cnn_text",
+            "field": "output",
+            "encoder": "cnn"
+          }
+        ],
+        "joint_encoders": false,
+        "join_operation": "default"
+      },
+      "classifier": "apple",
+      "optimizer": "adam",
+      "metrics": ["accuracy"]
+    },
+    "AlgoNetTextSimple": {
+      "encoders": {
+        "input_type": "text",
+        "inputs": [
+          {
+            "scenario": "w2v_text",
+            "field": "all",
+            "encoder": "lstm"
+          }
+        ],
+        "join_operation": "default"
+      },
+      "classifiers": ["problem_emb", "cherry"],
+      "optimizer": "adam",
+      "metrics": ["accuracy"]
+    },
+    "AlgoNetCodeTokens": {
+      "encoders": {
+        "input_type": "code",
+        "inputs": [
+          {
+            "scenario": "w2v_code_tokens",
+            "field": "tokens",
+            "encoder": "lstm"
+          }
+        ]
+      },
+      "classifiers": ["default_dense", "cherry"],
+      "optimizer": "adam",
+      "metrics": ["accuracy"]
+    },
+    "AlgoNetCodeTokens2": {
+      "encoders": {
+        "input_type": "code",
+        "inputs": [
+          {
+            "scenario": "w2v_code_symbs",
+            "field": "symbs",
+            "encoder": "lstm"
+          }
+        ]
+      },
+      "classifiers": ["default_dense", "cherry"],
+      "optimizer": "adam",
+      "metrics": ["accuracy"]
+    },
+    "AlgoNetAST": {
+      "encoders": {
+        "input_type": "code",
+        "inputs": [
+          {
+            "scenario": "code2vec",
+            "encoder": "ast"
+          }
+        ]
+      },
+      "classifiers": ["default_dense", "cherry"],
+      "optimizer": "adam",
+      "metrics": ["accuracy"]
+    },
+
+    "AlgoNetSafe": {
+      "encoders": {
+        "input_type": "code",
+        "inputs": [
+          {
+            "scenario": "safe",
+            "field": "safe",
+            "encoder": "small_lstm"
+          }
+        ]
+      },
+      "classifiers": ["default_dense", "cherry"],
+      "optimizer": "adam",
+      "metrics": ["accuracy"]
+    },
+    "AlgoNetCode2": {
+      "encoders": {
+        "input_type": "code",
+        "inputs": [
+          {
+            "scenario": "w2v_code_symbs",
+            "field": "symbs",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "safe",
+            "field": "safe",
+            "encoder": "small_lstm"
+          },
+          {
+            "scenario": "code2vec",
+            "encoder": "ast"
+          }
+        ],
+        "join_operation": "default"
+      },
+      "classifiers": ["default_dense", "cherry"],
+      "optimizer": "adam",
+      "metrics": ["accuracy"]
+    },
+    "AlgoNetCode": {
+      "encoders": {
+        "input_type": "code",
+        "inputs": [
+          {
+            "scenario": "w2v_code_tokens",
+            "field": "tokens",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "safe",
+            "field": "safe",
+            "encoder": "small_lstm"
+          },
+          {
+            "scenario": "code2vec",
+            "encoder": "ast"
+          }
+        ],
+        "join_operation": "default"
+      },
+      "classifiers": ["default_dense", "cherry"],
+      "optimizer": "adam",
+      "metrics": ["accuracy"]
+    },
+    "AlgoMasterpiece": {
+      "encoders": {
+        "input_type": "both",
+        "inputs": [
+          {
+            "scenario": "w2v_text",
+            "field": "statement",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "w2v_text",
+            "field": "input",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "w2v_text",
+            "field": "output",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "w2v_code_tokens",
+            "field": "tokens",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "safe",
+            "field": "safe",
+            "encoder": "small_lstm"
+          },
+          {
+            "scenario": "code2vec",
+            "encoder": "ast"
+          }
+        ],
+        "join_operation": "default"
+      },
+      "classifiers": ["default_dense", "cherry"],
+      "optimizer": "adam",
+      "metrics": ["accuracy"]
+    },
+    "AlgoMasterpiece2": {
+      "encoders": {
+        "input_type": "both",
+        "inputs": [
+          {
+            "scenario": "w2v_text",
+            "field": "statement",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "w2v_text",
+            "field": "input",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "w2v_text",
+            "field": "output",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "safe",
+            "field": "safe",
+            "encoder": "small_lstm"
+          },
+          {
+            "scenario": "code2vec",
+            "encoder": "ast"
+          }
+        ],
+        "join_operation": "default"
+      },
+      "classifiers": ["default_dense", "cherry"],
+      "optimizer": "adam",
+      "metrics": ["accuracy"]
+    }
+  }
+}
