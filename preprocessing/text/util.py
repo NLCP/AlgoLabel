@@ -1,4 +1,3 @@
-
 from nltk import word_tokenize
 
 map_chars = {

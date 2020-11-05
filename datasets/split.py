@@ -1,4 +1,3 @@
-
 import logging
 from util import load_dataset, dump_dataset, fcall, multi_process, print_defaultdict
 from tqdm import tqdm
@@ -10,26 +9,24 @@ from skmultilearn.model_selection import IterativeStratification
 
 
 def store_sample(distribution, sample, difficulty):
-
     distribution[difficulty].append(sample)
     sample["difficulty_class"] = difficulty
 
 
 @fcall
 def filter_irrelevant_tasks(args, dataset):
-
-    main_ds        = []
-    aux_ds         = []
-    dups           = set()
-    fields         = args["preprocess"]["text"]["fields"]
+    main_ds = []
+    aux_ds = []
+    dups = set()
+    fields = args["preprocess"]["text"]["fields"]
     ignore_phrases = [
         "This problem was deleted from the contest",
         "This is an interactive"
     ]
 
     def check_valid_submissions(sample):
-         if "solutions" in sample and len(sample["solutions"]) > 0:
-             aux_ds.append(sample)
+        if "solutions" in sample and len(sample["solutions"]) > 0:
+            aux_ds.append(sample)
 
     for sample in dataset:
 
@@ -82,7 +79,6 @@ def filter_irrelevant_tasks(args, dataset):
 
 @fcall
 def compute_tag_distribution(args, dataset):
-
     label_distro = defaultdict(int)
     logging.info("Num. of samples ".format(len(dataset)))
 
@@ -96,8 +92,7 @@ def compute_tag_distribution(args, dataset):
 
 
 def split_stratified(args, dataset):
-
-    Y       = np.array([sample["Y"] for sample in dataset])
+    Y = np.array([sample["Y"] for sample in dataset])
     dataset = np.array(dataset)
 
     percentage = args["split"]["percentage"]
@@ -106,9 +101,9 @@ def split_stratified(args, dataset):
                                          random_state=42)
     remaining_idx, test_idx = next(stratifier.split(dataset, Y))
 
-    X_test  = dataset[test_idx]
+    X_test = dataset[test_idx]
     dataset = dataset[remaining_idx]
-    Y       = Y[remaining_idx]
+    Y = Y[remaining_idx]
 
     percentage = percentage / (1.0 - percentage)
     stratifier = IterativeStratification(n_splits=2, order=2,
@@ -117,7 +112,7 @@ def split_stratified(args, dataset):
     train_idx, dev_idx = next(stratifier.split(dataset, Y))
 
     X_train = dataset[train_idx]
-    X_dev   = dataset[dev_idx]
+    X_dev = dataset[dev_idx]
 
     return list(X_train), list(X_dev), list(X_test)
 
@@ -127,13 +122,12 @@ def store_sample_percentage(difficulty_distro,
                             difficulty_classes,
                             percentage,
                             targets):
-
     new_dataset = []
 
     for difficulty in difficulty_classes:
 
-        count_ds    = difficulty_distro[difficulty]
-        samples_ds  = distribution[difficulty]
+        count_ds = difficulty_distro[difficulty]
+        samples_ds = distribution[difficulty]
         old_dataset = []
 
         Y = []
@@ -152,7 +146,7 @@ def store_sample_percentage(difficulty_distro,
             X_train = []
         else:
             samples_ds = np.array(samples_ds)
-            Y          = np.array(Y)
+            Y = np.array(Y)
 
             stratifier = IterativeStratification(n_splits=2, order=2,
                                                  sample_distribution_per_fold=[percentage, 1.0 - percentage],
@@ -169,12 +163,11 @@ def store_sample_percentage(difficulty_distro,
             print(test_indexes[:10])
 
             X_train = samples_ds[train_indexes]
-            X_test  = samples_ds[test_indexes]
+            X_test = samples_ds[test_indexes]
 
             # exit(0)
             # X_train, _ = samples_ds[train_indexes], Y[train_indexes, :]
             # X_test, _  = samples_ds[test_indexes], Y[test_indexes, :]
-
 
         distribution[difficulty] = list(X_train)
         new_dataset += list(X_test)
@@ -214,13 +207,12 @@ def strip_text_sample(sample):
 
 
 def extract_solutions(dataset):
-
     result = []
     for sample in dataset:
         if "solutions" in sample:
             for solution in sample["solutions"]:
                 if "Y" in sample:
-                    solution["Y"]    = sample["Y"]
+                    solution["Y"] = sample["Y"]
                 if "tags" in sample:
                     solution["tags"] = sample["tags"]
                 result.append(solution)
@@ -228,7 +220,6 @@ def extract_solutions(dataset):
 
 
 def setup_Y_field(dataset, targets):
-
     for sample in dataset:
         y = []
         for label in targets:
@@ -240,21 +231,20 @@ def setup_Y_field(dataset, targets):
 
 
 @fcall
-def  split_dataset(args):
-
+def split_dataset(args):
     params = args["split"]
 
-    dataset      = load_dataset("./data/datasets/dataset.json")
+    dataset = load_dataset("./data/datasets/dataset.json")
     distribution = defaultdict(list)
-    targets      = args["split"]["labels"]
+    targets = args["split"]["labels"]
 
     np.random.seed(params["random_seed"])
     np.random.shuffle(dataset)
 
-    splits   = ["train", "dev", "test", "unlabeled"]
+    splits = ["train", "dev", "test", "unlabeled"]
     datasets = {
-        "code": {split : [] for split in splits},
-        "text": {split : [] for split in splits}
+        "code": {split: [] for split in splits},
+        "text": {split: [] for split in splits}
     }
 
     aux_ds, main_ds = filter_irrelevant_tasks(args, dataset)

@@ -3,7 +3,6 @@ from pprint import pprint as pp
 
 
 def debug():
-
     from collections import defaultdict
 
     sample = {
@@ -50,9 +49,7 @@ def debug():
     pp(content)
 
 
-
 def preprocess_text_sample(sample, args):
-
     fields = args["preprocess"]["text"]["fields"]
     fields = [field for field in fields if fields[field] and field in sample]
 
@@ -85,6 +82,3 @@ def preprocess_text_sample(sample, args):
 
 if __name__ == "__main__":
     debug()
-
-
-

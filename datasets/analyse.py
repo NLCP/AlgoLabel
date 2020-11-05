@@ -1,16 +1,14 @@
-
 from util import load_dataset, dump_dataset, fcall, print_defaultdict
 from collections import defaultdict
 
 
 @fcall
 def compute_len_stats(args):
-
-    model        = args["model"]
+    model = args["model"]
     model_params = args["models"][model]
-    encoders     = model_params["encoders"]
-    inputs       = encoders["inputs"]
-    input_type   = encoders["input_type"]
+    encoders = model_params["encoders"]
+    inputs = encoders["inputs"]
+    input_type = encoders["input_type"]
 
     stats = {}
     for input in inputs:
@@ -23,7 +21,7 @@ def compute_len_stats(args):
             ds = "{}_complete".format(ds)
 
         dataset = load_dataset("./data/datasets/split/{}/{}.json".format(input_type,
-                                                                    ds))
+                                                                         ds))
 
         for sample in dataset:
             for input in inputs:
@@ -39,24 +37,23 @@ def compute_len_stats(args):
 
 @fcall
 def compute_code_statistics(args, dataset):
-
-    vocab      = set()
+    vocab = set()
     num_tokens = 0
 
     without_solutions = 0
     avg_num_solutions = 0
 
     avg_num_tokens = 0
-    avg_num_ast    = 0
-    avg_safe       = 0
+    avg_num_ast = 0
+    avg_safe = 0
 
     max_source = 0
-    max_ast    = 0
-    max_safe   = 0
+    max_ast = 0
+    max_safe = 0
 
     problems = set()
 
-    no_tags   = 0
+    no_tags = 0
     with_tags = 0
 
     for sample in dataset:
@@ -86,8 +83,6 @@ def compute_code_statistics(args, dataset):
         if "tokens" in sample and len(sample["tokens"]) == max_source:
             max_ast = len(sample["starts"])
             max_safe = len(sample["safe"])
-
-
 
         # for token in sample["tokens"]:
         #     vocab.add(token)
@@ -121,7 +116,6 @@ def compute_code_statistics(args, dataset):
 
 @fcall
 def compute_text_statistics(args, dataset):
-
     vocab = set()
 
     field_stats = {
@@ -154,11 +148,10 @@ def compute_text_statistics(args, dataset):
 
 @fcall
 def compute_tag_statistics(args, dataset):
-
     print("Number of samples", len(dataset))
 
-    tag_distro           = defaultdict(int)
-    avg_num_tags         = 0
+    tag_distro = defaultdict(int)
+    avg_num_tags = 0
     samples_without_tags = 0
 
     for sample in dataset:
@@ -179,7 +172,6 @@ def compute_tag_statistics(args, dataset):
 
 @fcall
 def compute_counter_statistics(args):
-
     full_dataset = []
     for source in args["sources"]:
 
@@ -198,7 +190,6 @@ def compute_counter_statistics(args):
 
 
 def fix_y(args):
-
     train_all = load_dataset("./data/datasets/split/code/train_all.json")
 
     for sample in train_all:
@@ -215,7 +206,6 @@ def fix_y(args):
 
 
 def investigate_curiosity(args):
-
     test = load_dataset("./data/datasets/split/text/test.json")
 
     tag_distro = defaultdict(int)
@@ -230,7 +220,6 @@ def investigate_curiosity(args):
 
 
 def analyse_license_situation(args):
-
     bad = 0
     not_so_bad = 0
 
@@ -254,8 +243,7 @@ def analyse_license_situation(args):
 
 @fcall
 def analyse_split(args):
-
-    for input_type in ["code"]: #["code", "text"]:
+    for input_type in ["code"]:  # ["code", "text"]:
 
         for split in ["train", "dev", "test"]:
             # if input_type == "code":
@@ -271,9 +259,9 @@ def analyse_split(args):
 
         break
 
+
 @fcall
 def diff_stats(args):
-
     cf = 0
 
     for split in ["dev", "test", "train"]:

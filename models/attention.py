@@ -1,4 +1,4 @@
-from keras.preprocessing.text import Tokenizer,  text_to_word_sequence
+from keras.preprocessing.text import Tokenizer, text_to_word_sequence
 from keras.engine.topology import Layer
 from keras import initializers as initializers, regularizers, constraints
 from keras.callbacks import Callback, ModelCheckpoint

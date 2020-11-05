@@ -20,22 +20,20 @@ class Embedding(object):
 
 @fcall
 def load_word2vec(args, input_type):
-
     size = args["embeddings"]["framework"]["word2vec"]["size"]
     path = "./data/embeddings/w2v_{}_{}.emb".format(input_type, size)
 
     args["w2v_{}".format(input_type)] = Word2Vec.load(path)
-    emb_matrix  = np.array(args["w2v_{}".format(input_type)].wv.vectors)
-    unk_vector  = np.mean(emb_matrix, axis=0)
-    pad_vector  = np.zeros(size)
+    emb_matrix = np.array(args["w2v_{}".format(input_type)].wv.vectors)
+    unk_vector = np.mean(emb_matrix, axis=0)
+    pad_vector = np.zeros(size)
 
-    args["w2v_{}_matrix".format(input_type)]     = np.append(emb_matrix, [unk_vector, pad_vector], axis=0)
+    args["w2v_{}_matrix".format(input_type)] = np.append(emb_matrix, [unk_vector, pad_vector], axis=0)
     args["w2v_{}_vocab_size".format(input_type)] = args["w2v_{}_matrix".format(input_type)].shape[0]
 
 
 @fcall
 def pretrain_word2vec_text(args, settings):
-
     sentences = []
 
     sources = ["train", "dev", "unlabeled"]
@@ -69,7 +67,6 @@ def pretrain_word2vec_text(args, settings):
 
 @fcall
 def pretrain_word2vec_code(args, settings, input_field):
-
     sources = []
     for ds_type in ["train", "dev", "unlabeled"]:
         dataset = load_dataset("./data/datasets/split/code/{}_complete.json".format(ds_type))
@@ -93,14 +90,13 @@ def pretrain_word2vec_code(args, settings, input_field):
 
 @fcall
 def fill_in_ast_paths(args, settings):
-
     data = {}
 
     with open("./data/code/code2vec/cpp/path_contexts.csv", "r") as f:
 
         for line in f:
-            tokens              = line.split()
-            id                  = tokens[0].split("\\")[-1].split(".cpp")[0]
+            tokens = line.split()
+            id = tokens[0].split("\\")[-1].split(".cpp")[0]
             starts, paths, ends = [], [], []
 
             for path in tokens[1:]:
@@ -147,9 +143,8 @@ def fill_in_ast_paths(args, settings):
 
 
 def pretrain_embeddings(args):
-
-    scenario   = args["embeddings"][args["pretrain"]["scenario"]]
-    settings   = args["embeddings"]["framework"][scenario["emb_type"]]
+    scenario = args["embeddings"][args["pretrain"]["scenario"]]
+    settings = args["embeddings"]["framework"][scenario["emb_type"]]
     input_type = scenario["input_type"]
 
     if input_type == "text":

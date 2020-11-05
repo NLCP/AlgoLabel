@@ -1,4 +1,3 @@
-
 from util import fcall, load_dataset, dump_dataset
 # from keras.engine.input_layer import Input
 # from keras.layers.embeddings import Embedding
@@ -16,8 +15,7 @@ from keras.regularizers import l2
 import tensorflow as tf
 from keras import backend as K
 
-
-from models.attention import AttentionWithContext, CustomAttention #, Code2VecAttentionLayer
+from models.attention import AttentionWithContext, CustomAttention  # , Code2VecAttentionLayer
 from keras.callbacks.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.metrics import classification_report, roc_auc_score, hamming_loss
 
@@ -39,24 +37,24 @@ class AlgoLabel(object):
 
     def __init__(self, args):
 
-        self.args       = args
+        self.args = args
         self.model_name = args["model"]
-        self.params     = args["models"][self.model_name]
+        self.params = args["models"][self.model_name]
 
         print("Model params")
         pp(self.params)
 
         self.input_layers = []
 
-        self.inputs     = []
+        self.inputs = []
         self.att_scores = []
 
         self.embbedings = {}
-        self.encoders   = {}
-        self.attention  = {}
+        self.encoders = {}
+        self.attention = {}
 
-        self.model      = None
-        self.callbacks  = []
+        self.model = None
+        self.callbacks = []
         self.load_epoch = self.args["load_weights_from_epoch"]
 
     def setup_encoder(self, encoder_name):
@@ -84,7 +82,7 @@ class AlgoLabel(object):
                            recurrent_regularizer=regularizer,
                            bias_regularizer=regularizer,
                            return_sequences=return_sequences
-                ))
+                           ))
         else:
             rnn = Bidirectional(
                 layer=GRU(units=encoder["hidden_size"],
@@ -108,17 +106,17 @@ class AlgoLabel(object):
     def setup_ast_input_layer(self, input):
 
         encoder_name = input["encoder"]
-        encoder      = self.args["encoders"][input["encoder"]]
-        max_seq_len  = encoder["max_seq_len"]
+        encoder = self.args["encoders"][input["encoder"]]
+        max_seq_len = encoder["max_seq_len"]
 
         path_source_token_input = Input(shape=(max_seq_len,),
-                                        name="ast_beginnings",)
+                                        name="ast_beginnings", )
 
-        path_input              = Input(shape=(max_seq_len,),
-                                        name="ast_paths",)
+        path_input = Input(shape=(max_seq_len,),
+                           name="ast_paths", )
 
         path_target_token_input = Input(shape=(max_seq_len,),
-                                        name="ast_endings",)
+                                        name="ast_endings", )
 
         self.inputs.append(path_source_token_input)
         self.inputs.append(path_input)
@@ -158,9 +156,9 @@ class AlgoLabel(object):
         context_embedded = Dropout(encoder["dropout"])(context_embedded)
 
         context_after_dense = TimeDistributed(
-                                Dense(2 * encoder["token_emb_size"] + encoder["path_emb_size"],
-                                      use_bias=False,
-                                      activation='tanh'))(context_embedded)
+            Dense(2 * encoder["token_emb_size"] + encoder["path_emb_size"],
+                  use_bias=False,
+                  activation='tanh'))(context_embedded)
 
         attention = self.setup_attention(encoder_name)
         layer, att = attention(context_after_dense)
@@ -229,7 +227,7 @@ class AlgoLabel(object):
 
     def build_emnlp_model(self):
 
-        inputs  = self.params["encoders"]["inputs"]
+        inputs = self.params["encoders"]["inputs"]
         encoder = self.args["encoders"]["cnn"]
 
         # setup input layers
@@ -254,8 +252,8 @@ class AlgoLabel(object):
             Permute((2, 1))(cv) for cv in convs
         ]
 
-        layer      = Concatenate(axis=2)(convs)
-        layer      = Flatten()(layer)
+        layer = Concatenate(axis=2)(convs)
+        layer = Flatten()(layer)
 
         ###########################################
         if self.params["encoders"]["joint_encoders"]:
@@ -292,8 +290,8 @@ class AlgoLabel(object):
         #######################################
 
         classifier = self.setup_classifier(layer, self.params["classifier"])
-        outputs    = [classifier]
-        loss       = ["binary_crossentropy"]
+        outputs = [classifier]
+        loss = ["binary_crossentropy"]
 
         if "loss" in self.params and self.params["loss"] == "focal_loss":
             loss[0] = AlgoLabel.focal_loss
@@ -316,11 +314,11 @@ class AlgoLabel(object):
     def setup_embedding(self, input, emb_input_type, matrix_name):
 
         emb_scenario = input["scenario"]
-        emb_type     = self.args["embeddings"][emb_scenario]["emb_type"]
-        emb_input    = self.args["embeddings"][emb_scenario]["input_type"]
-        emb_params   = self.args["embeddings"]["framework"][emb_type]
-        encoder      = self.args["encoders"][input["encoder"]]
-        max_seq_len  = encoder["max_seq_len_{}".format(emb_input_type)]
+        emb_type = self.args["embeddings"][emb_scenario]["emb_type"]
+        emb_input = self.args["embeddings"][emb_scenario]["input_type"]
+        emb_params = self.args["embeddings"]["framework"][emb_type]
+        encoder = self.args["encoders"][input["encoder"]]
+        max_seq_len = encoder["max_seq_len_{}".format(emb_input_type)]
 
         if emb_scenario not in self.embbedings:
             if emb_type != "word2vec":
@@ -366,33 +364,33 @@ class AlgoLabel(object):
             return self.setup_cnn_input_layer(input)
 
         encoder_name = input["encoder"]
-        encoder      = self.args["encoders"][input["encoder"]]
+        encoder = self.args["encoders"][input["encoder"]]
 
-        emb_type     = self.args["embeddings"][emb_scenario]["emb_type"]
-        emb_input    = self.args["embeddings"][emb_scenario]["input_type"]
-        emb_params   = self.args["embeddings"]["framework"][emb_type]
-        max_seq_len  = encoder["max_seq_len_{}".format(emb_input)]
+        emb_type = self.args["embeddings"][emb_scenario]["emb_type"]
+        emb_input = self.args["embeddings"][emb_scenario]["input_type"]
+        emb_params = self.args["embeddings"]["framework"][emb_type]
+        max_seq_len = encoder["max_seq_len_{}".format(emb_input)]
 
         emb_input_type, matrix_name = self.compute_matrix_name(input, emb_input)
 
         if not layer_name:
-            name  = "{}_encoder".format(input["field"])
+            name = "{}_encoder".format(input["field"])
         else:
             name = layer_name
 
         layer = Input(shape=(max_seq_len,), name=name)
         self.inputs.append(layer)
 
-        emb     = self.setup_embedding(input, emb_input_type, matrix_name)
-        layer   = emb(layer)
+        emb = self.setup_embedding(input, emb_input_type, matrix_name)
+        layer = emb(layer)
 
         pad_idx = len(self.args["{}_matrix".format(matrix_name)]) - 1
         masking = Masking(mask_value=pad_idx,
                           input_shape=(max_seq_len, emb_params["size"]))
-        layer   = masking(layer)
+        layer = masking(layer)
 
-        enc     = self.setup_encoder(encoder_name)
-        layer   = enc(layer)
+        enc = self.setup_encoder(encoder_name)
+        layer = enc(layer)
 
         if encoder["attention"]:
             print(encoder_name)
@@ -461,7 +459,7 @@ class AlgoLabel(object):
 
         # join inputs
         if len(inputs) > 1:
-            join_op    = self.setup_join_inputs()
+            join_op = self.setup_join_inputs()
             classifier = join_op(self.input_layers)
         else:
             classifier = self.input_layers[0]
@@ -474,7 +472,7 @@ class AlgoLabel(object):
             classifier = self.setup_classifier(classifier, cls_type)
 
         outputs = [classifier] + self.att_scores
-        loss    = ["binary_crossentropy"] + [None] * len(self.att_scores)
+        loss = ["binary_crossentropy"] + [None] * len(self.att_scores)
 
         if "loss" in self.params and self.params["loss"] == "focal_loss":
             loss[0] = tfa.losses.sigmoid_focal_crossentropy
@@ -545,7 +543,7 @@ class AlgoLabel(object):
     def setup_weights(self):
 
         if self.load_epoch:
-            path  = "./data/models/{}/models/epoch_{:02d}.h5".format(self.model_name, self.load_epoch)
+            path = "./data/models/{}/models/epoch_{:02d}.h5".format(self.model_name, self.load_epoch)
             print("Load weights from epoch {} - {}".format(self.load_epoch, path))
             self.model.load_weights(path)
         else:
@@ -554,12 +552,12 @@ class AlgoLabel(object):
     def train(self):
 
         X_train, Y_train = self.args["X_train"], self.args["Y_train"]
-        X_dev, Y_dev     = self.args["X_dev"], self.args["Y_dev"]
+        X_dev, Y_dev = self.args["X_dev"], self.args["Y_dev"]
         self.setup_callbacks()
 
         if self.args["train"]["extra_supervision"]:
             Y_train_extra = self.args["Y_train_source_emb"]
-            Y_dev_extra   = self.args["Y_dev_source_emb"]
+            Y_dev_extra = self.args["Y_dev_source_emb"]
 
             Y_train = {
                 "cherry": Y_train,
@@ -629,9 +627,9 @@ class AlgoLabel(object):
                 if difficulty == "Hard" and "graphs" in sample["tags"]:
                     self.log_results_header(f, idx, y_test, y_pred, sample)
                     f.write("{}\n\n{}\n\n{}\n\n".format(
-                            sample["statement"],
-                            sample["input"],
-                            sample["output"]))
+                        sample["statement"],
+                        sample["input"],
+                        sample["output"]))
 
         for diff in difficulty_distro:
             self.compute_results(np.array(difficulty_distro[diff][0]),
@@ -647,7 +645,6 @@ class AlgoLabel(object):
         Y_pred[Y_pred >= cls_threshold] = 1
 
         for idx, sample in enumerate(test_data):
-
             problem_index = sample["index"].split("_")[1]
             problems[problem_index].append(Y_pred[idx])
 
@@ -672,7 +669,7 @@ class AlgoLabel(object):
     def compute_results(self, test_res, pred_res, ds):
 
         cls_threshold = self.args["test"]["threshold"]
-        targets       = self.args["split"]["labels"]
+        targets = self.args["split"]["labels"]
 
         print("Computing results for the {} dataset!".format(ds))
 
@@ -704,13 +701,13 @@ class AlgoLabel(object):
 
     def test(self, split="test"):
 
-        X_test, Y_test   = self.args["X_test"], self.args["Y_test"]
+        X_test, Y_test = self.args["X_test"], self.args["Y_test"]
 
         if not self.load_epoch:
             self.load_epoch = self.args["train"]["num_epochs"]
             self.setup_weights()
 
-        result     = self.model.predict(X_test)
+        result = self.model.predict(X_test)
         input_type = self.args["models"][self.model_name]["encoders"]["input_type"]
 
         if len(self.att_scores) == 0:
@@ -736,15 +733,15 @@ class AlgoLabel(object):
 
     def extract_embeddings(self, split):
 
-        X_test, Y_test   = self.args["X_{}".format(split)], self.args["Y_{}".format(split)]
+        X_test, Y_test = self.args["X_{}".format(split)], self.args["Y_{}".format(split)]
 
         if not self.load_epoch:
             self.load_epoch = self.args["train"]["num_epochs"]
             self.setup_weights()
 
-        result     = self.model.predict(X_test)
+        result = self.model.predict(X_test)
         input_type = self.args["models"][self.model_name]["encoders"]["input_type"]
-        embedding  = result[-1]
+        embedding = result[-1]
 
         print("Embeddings", embedding.shape)
 
@@ -757,7 +754,7 @@ class AlgoLabel(object):
         test_data = self.load_test_data(input_type, split=split)
 
         problem_emb = defaultdict(list)
-        label_emb   = defaultdict(list)
+        label_emb = defaultdict(list)
 
         for idx, sample in enumerate(test_data):
 
@@ -779,11 +776,3 @@ class AlgoLabel(object):
             result["label_emb"][label] = list(map(float, list(np.average(label_emb[label], axis=0))))
 
         dump_dataset("./data/embeddings/source_emb_{}.json".format(split), result)
-
-
-
-
-
-
-
-

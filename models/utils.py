@@ -1,4 +1,3 @@
-
 from util import fcall, load_dataset, tf_gpu_housekeeping
 import numpy as np
 
@@ -15,14 +14,14 @@ import logging
 
 from models.algolabel import AlgoLabel
 
+
 @fcall
 def evaluate_model(args, model, label=""):
-
     X_test = args["X_test"]
     Y_test = np.array(args["Y_test"])
 
     if args["current_model"] == "AlgoNet":
-        X_test  = [X_test[0], X_test[1], X_test[2]]
+        X_test = [X_test[0], X_test[1], X_test[2]]
     elif args["current_model"] == "AlgoHan":
         X_test = np.array(args["X_test"])
     elif args["current_model"] == "BertAlgoNet":
@@ -68,8 +67,7 @@ def evaluate_model(args, model, label=""):
 
     test_data = load_dataset("./data/datasets/test.json")
     for idx, (y_test, y_pred) in enumerate(zip(Y_test, Y_pred)):
-
-        sample     = test_data[idx]
+        sample = test_data[idx]
         difficulty = sample["difficulty"]
 
         test, pred = difficulty_distro[difficulty]
@@ -83,7 +81,7 @@ def evaluate_model(args, model, label=""):
         auc = roc_auc_score(test_res, pred_res)
         print("ROC-AUC: {}".format(auc))
 
-        pred_res[pred_res < 0.4]  = 0
+        pred_res[pred_res < 0.4] = 0
         pred_res[pred_res >= 0.4] = 1
 
         hamming = hamming_loss(test_res, pred_res)
@@ -110,7 +108,6 @@ def evaluate_model(args, model, label=""):
 
 @fcall
 def run_model(args, model, label=""):
-
     model_path = "./data/models/{}".format(args["current_model"])
 
     if args["load_weights_from_epoch"]:
@@ -120,20 +117,20 @@ def run_model(args, model, label=""):
         args["load_weights_from_epoch"] = 0
 
     X_train, Y_train = args["X_train"], args["Y_train"]
-    X_dev, Y_dev     = args["X_dev"], args["Y_dev"]
-    X_test, Y_test   = args["X_test"], args["Y_test"]
+    X_dev, Y_dev = args["X_dev"], args["Y_dev"]
+    X_test, Y_test = args["X_test"], args["Y_test"]
 
     if args["current_model"] == "AlgoHan":
         X_train = np.array(X_train)
-        X_dev   = np.array(X_dev)
-        X_test  = np.array(X_test)
+        X_dev = np.array(X_dev)
+        X_test = np.array(X_test)
     elif args["current_model"] == "AlgoNet":
         X_train = [X_train[0], X_train[1], X_train[2]]
-        X_dev   = [X_dev[0], X_dev[1], X_dev[2]]
-        X_test  = [X_test[0], X_test[1], X_test[2]]
+        X_dev = [X_dev[0], X_dev[1], X_dev[2]]
+        X_test = [X_test[0], X_test[1], X_test[2]]
     elif args["current_model"] == "BertAlgoNet":
         X_train = [np.array(X_train[source]) for source in ["ids", "masks", "segments"]]
-        X_dev   = [np.array(X_dev[source])   for source in ["ids", "masks", "segments"]]
+        X_dev = [np.array(X_dev[source]) for source in ["ids", "masks", "segments"]]
         # X_test  = [np.array(X_test[source])  for source in ["ids", "masks", "segments"]]
 
         X_train = [
@@ -149,8 +146,8 @@ def run_model(args, model, label=""):
         ]
     elif args["current_model"] == "3BertAlgoNet":
 
-        train, dev      = args["X_train"], args["X_dev"]
-        X_train, X_dev  = [], []
+        train, dev = args["X_train"], args["X_dev"]
+        X_train, X_dev = [], []
 
         for source in ["statement", "input", "output"]:
             for input_type in ["ids", "masks", "segments"]:
@@ -176,12 +173,12 @@ def run_model(args, model, label=""):
     tb = TensorBoard(log_dir="./logs/tensorboard",
                      histogram_freq=0,
                      update_freq='epoch',
-    )
+                     )
 
     history = model.fit(X_train, Y_train,
                         validation_data=(X_dev, Y_dev),
                         epochs=args["num_epochs"] - args["load_weights_from_epoch"],
-                        batch_size=args["batch_size"],                  # 32
+                        batch_size=args["batch_size"],  # 32
                         callbacks=[es, tb],
                         shuffle=True,
                         verbose=2)
@@ -194,7 +191,6 @@ def run_model(args, model, label=""):
 
 
 def build_model(args):
-
     if args["current_model"] == "AlgoNet":
         return build_algonet(args)
     elif args["current_model"] == "AlgoHan":
@@ -218,7 +214,6 @@ def setup_model(args, extract=False, extra_supervision=False):
 
 @fcall
 def load_input(args, load_tokens=False, load_extra_supervision=False):
-
     model_name = args["model"]
     print("Load tokens:", load_tokens)
     print("Load extra supervision:", load_extra_supervision)
@@ -236,7 +231,7 @@ def load_input(args, load_tokens=False, load_extra_supervision=False):
                 "./data/models/{}/data/X_toks_{}.json".format(model_name, split))
 
         if load_extra_supervision:
-            args["Y_{}_source_emb".format(split)]  = np.array(load_dataset(
+            args["Y_{}_source_emb".format(split)] = np.array(load_dataset(
                 "./data/models/{}/data/Y_{}_source_emb.json".format(model_name, split)
             ))
 
@@ -266,6 +261,3 @@ def extract_embeddings(args):
 
     for split in ["train", "dev", "test"]:
         model.extract_embeddings(split)
-
-
-

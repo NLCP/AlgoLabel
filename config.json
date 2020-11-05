@@ -3,26 +3,37 @@
   "version": "1.0.0",
   "random_seed": 42,
   "logging": {
-		"filename": "logs/run.log",
-		"filemode": "w",
-		"level": "debug"
+    "filename": "logs/run.log",
+    "filemode": "w",
+    "level": "debug"
   },
   "extraction": {},
   "sources": {
     "codeforces": {
-      "type": ["text", "code"]
+      "type": [
+        "text",
+        "code"
+      ]
     },
     "kattis": {
-      "type": ["text"]
+      "type": [
+        "text"
+      ]
     },
     "uva": {
-      "type": ["text"]
+      "type": [
+        "text"
+      ]
     },
     "infoarena": {
-      "type": ["code"]
+      "type": [
+        "code"
+      ]
     },
     "upb": {
-      "type": ["code"]
+      "type": [
+        "code"
+      ]
     }
   },
   "preprocess": {
@@ -39,39 +50,39 @@
       "clang": false
     },
     "tags": {
-        "fft": "math",
-        "chinese remainder theorem": "math",
-        "geometry": "math",
-        "probabilities": "math",
-        "number theory": "math",
-        "hashing": "data structures",
-        "flows": "graphs",
-        "flow": "graphs",
-        "dfs and similar": "graphs",
-        "shortest paths": "graphs",
-        "shortest path": "graphs",
-        "trees": "graphs",
-        "graph matchings": "graphs",
-        "dsu": "data structures",
-        "string suffix structures": "data structures",
-        "binary search": "divide and conquer",
-        "ternary search": "divide and conquer",
-        "dp": "dp & greedy",
-        "greedy": "dp & greedy",
-        "dijkstra": "graphs",
-        "reachability": "graphs",
-        "all pairs": "graphs",
-        "mst": "graphs",
-        "knapsack": "graphs",
-        "dag": "graphs",
-        "flood fill": "graphs",
-        "bst": "data structures",
-        "suffix tree": "data structures",
-        "topsort": "graphs",
-        "graph": "graphs",
-        "lca": "graphs",
-        "kuhn": "graphs",
-        "tsp": "graphs"
+      "fft": "math",
+      "chinese remainder theorem": "math",
+      "geometry": "math",
+      "probabilities": "math",
+      "number theory": "math",
+      "hashing": "data structures",
+      "flows": "graphs",
+      "flow": "graphs",
+      "dfs and similar": "graphs",
+      "shortest paths": "graphs",
+      "shortest path": "graphs",
+      "trees": "graphs",
+      "graph matchings": "graphs",
+      "dsu": "data structures",
+      "string suffix structures": "data structures",
+      "binary search": "divide and conquer",
+      "ternary search": "divide and conquer",
+      "dp": "dp & greedy",
+      "greedy": "dp & greedy",
+      "dijkstra": "graphs",
+      "reachability": "graphs",
+      "all pairs": "graphs",
+      "mst": "graphs",
+      "knapsack": "graphs",
+      "dag": "graphs",
+      "flood fill": "graphs",
+      "bst": "data structures",
+      "suffix tree": "data structures",
+      "topsort": "graphs",
+      "graph": "graphs",
+      "lca": "graphs",
+      "kuhn": "graphs",
+      "tsp": "graphs"
     },
     "tags_keywords": {
       "graphs": [
@@ -130,7 +141,12 @@
   "split": {
     "percentage": 0.15,
     "random_seed": 42,
-    "labels": ["math", "implementation", "graphs", "dp & greedy"]
+    "labels": [
+      "math",
+      "implementation",
+      "graphs",
+      "dp & greedy"
+    ]
   },
   "pretrain": {
     "scenario": "w2v_text"
@@ -171,7 +187,7 @@
     }
   },
   "embeddings": {
-    "framework":{
+    "framework": {
       "word2vec": {
         "size": 100,
         "window": 5,
@@ -179,7 +195,6 @@
         "workers": 32
       },
       "ast": {
-
       }
     },
     "w2v_text": {
@@ -251,7 +266,11 @@
       "dropout": 0.1
     },
     "cnn": {
-      "kernel_sizes": [3, 4, 5],
+      "kernel_sizes": [
+        3,
+        4,
+        5
+      ],
       "kernel_num": 512,
       "max_seq_len": 250,
       "max_seq_len_text": 250
@@ -265,25 +284,33 @@
   "classifier": {
     "default_dense": {
       "dropout": 0.1,
-      "dense": [64],
+      "dense": [
+        64
+      ],
       "activation": "relu",
       "regularizer": 0.01
     },
     "problem_emb": {
       "dropout": 0.1,
-      "dense": [64],
+      "dense": [
+        64
+      ],
       "activation": "relu",
       "regularizer": 0.01
     },
     "cherry": {
       "dropout": 0.1,
-      "dense": [4],
+      "dense": [
+        4
+      ],
       "activation": "sigmoid",
       "regularizer": 0.01
     },
     "apple": {
       "dropout": 0.01,
-      "dense": [4],
+      "dense": [
+        4
+      ],
       "activation": "sigmoid",
       "regularizer": 0.01
     }
@@ -311,9 +338,13 @@
         ],
         "join_operation": "default"
       },
-      "classifiers": ["cherry"],
+      "classifiers": [
+        "cherry"
+      ],
       "optimizer": "adam",
-      "metrics": ["accuracy"],
+      "metrics": [
+        "accuracy"
+      ],
       "loss": "binary_crossentropy"
     },
     "EMNLP": {
@@ -341,7 +372,9 @@
       },
       "classifier": "apple",
       "optimizer": "adam",
-      "metrics": ["accuracy"]
+      "metrics": [
+        "accuracy"
+      ]
     },
     "AlgoNetTextSimple": {
       "encoders": {
@@ -355,9 +388,14 @@
         ],
         "join_operation": "default"
       },
-      "classifiers": ["problem_emb", "cherry"],
+      "classifiers": [
+        "problem_emb",
+        "cherry"
+      ],
       "optimizer": "adam",
-      "metrics": ["accuracy"]
+      "metrics": [
+        "accuracy"
+      ]
     },
     "AlgoNetCodeTokens": {
       "encoders": {
@@ -370,9 +408,14 @@
           }
         ]
       },
-      "classifiers": ["default_dense", "cherry"],
+      "classifiers": [
+        "default_dense",
+        "cherry"
+      ],
       "optimizer": "adam",
-      "metrics": ["accuracy"]
+      "metrics": [
+        "accuracy"
+      ]
     },
     "AlgoNetCodeTokens2": {
       "encoders": {
@@ -385,9 +428,14 @@
           }
         ]
       },
-      "classifiers": ["default_dense", "cherry"],
+      "classifiers": [
+        "default_dense",
+        "cherry"
+      ],
       "optimizer": "adam",
-      "metrics": ["accuracy"]
+      "metrics": [
+        "accuracy"
+      ]
     },
     "AlgoNetAST": {
       "encoders": {
@@ -399,11 +447,15 @@
           }
         ]
       },
-      "classifiers": ["default_dense", "cherry"],
+      "classifiers": [
+        "default_dense",
+        "cherry"
+      ],
       "optimizer": "adam",
-      "metrics": ["accuracy"]
+      "metrics": [
+        "accuracy"
+      ]
     },
-
     "AlgoNetSafe": {
       "encoders": {
         "input_type": "code",
@@ -415,9 +467,14 @@
           }
         ]
       },
-      "classifiers": ["default_dense", "cherry"],
+      "classifiers": [
+        "default_dense",
+        "cherry"
+      ],
       "optimizer": "adam",
-      "metrics": ["accuracy"]
+      "metrics": [
+        "accuracy"
+      ]
     },
     "AlgoNetCode2": {
       "encoders": {
@@ -440,9 +497,14 @@
         ],
         "join_operation": "default"
       },
-      "classifiers": ["default_dense", "cherry"],
+      "classifiers": [
+        "default_dense",
+        "cherry"
+      ],
       "optimizer": "adam",
-      "metrics": ["accuracy"]
+      "metrics": [
+        "accuracy"
+      ]
     },
     "AlgoNetCode": {
       "encoders": {
@@ -465,9 +527,14 @@
         ],
         "join_operation": "default"
       },
-      "classifiers": ["default_dense", "cherry"],
+      "classifiers": [
+        "default_dense",
+        "cherry"
+      ],
       "optimizer": "adam",
-      "metrics": ["accuracy"]
+      "metrics": [
+        "accuracy"
+      ]
     },
     "AlgoMasterpiece": {
       "encoders": {
@@ -505,9 +572,14 @@
         ],
         "join_operation": "default"
       },
-      "classifiers": ["default_dense", "cherry"],
+      "classifiers": [
+        "default_dense",
+        "cherry"
+      ],
       "optimizer": "adam",
-      "metrics": ["accuracy"]
+      "metrics": [
+        "accuracy"
+      ]
     },
     "AlgoMasterpiece2": {
       "encoders": {
@@ -540,9 +612,14 @@
         ],
         "join_operation": "default"
       },
-      "classifiers": ["default_dense", "cherry"],
+      "classifiers": [
+        "default_dense",
+        "cherry"
+      ],
       "optimizer": "adam",
-      "metrics": ["accuracy"]
+      "metrics": [
+        "accuracy"
+      ]
     }
   }
 }
