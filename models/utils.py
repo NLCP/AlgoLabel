@@ -67,7 +67,7 @@ def evaluate_model(args, model, label=""):
 
     test_data = load_dataset("./data/datasets/test.json")
     for idx, (y_test, y_pred) in enumerate(zip(Y_test, Y_pred)):
-        sample = test_data[idx]
+        sample     = test_data[idx]
         difficulty = sample["difficulty"]
 
         test, pred = difficulty_distro[difficulty]
@@ -81,7 +81,7 @@ def evaluate_model(args, model, label=""):
         auc = roc_auc_score(test_res, pred_res)
         print("ROC-AUC: {}".format(auc))
 
-        pred_res[pred_res < 0.4] = 0
+        pred_res[pred_res < 0.4]  = 0
         pred_res[pred_res >= 0.4] = 1
 
         hamming = hamming_loss(test_res, pred_res)
@@ -117,20 +117,20 @@ def run_model(args, model, label=""):
         args["load_weights_from_epoch"] = 0
 
     X_train, Y_train = args["X_train"], args["Y_train"]
-    X_dev, Y_dev = args["X_dev"], args["Y_dev"]
-    X_test, Y_test = args["X_test"], args["Y_test"]
+    X_dev, Y_dev     = args["X_dev"], args["Y_dev"]
+    X_test, Y_test   = args["X_test"], args["Y_test"]
 
     if args["current_model"] == "AlgoHan":
         X_train = np.array(X_train)
-        X_dev = np.array(X_dev)
-        X_test = np.array(X_test)
+        X_dev   = np.array(X_dev)
+        X_test  = np.array(X_test)
     elif args["current_model"] == "AlgoNet":
         X_train = [X_train[0], X_train[1], X_train[2]]
-        X_dev = [X_dev[0], X_dev[1], X_dev[2]]
-        X_test = [X_test[0], X_test[1], X_test[2]]
+        X_dev   = [X_dev[0], X_dev[1], X_dev[2]]
+        X_test  = [X_test[0], X_test[1], X_test[2]]
     elif args["current_model"] == "BertAlgoNet":
         X_train = [np.array(X_train[source]) for source in ["ids", "masks", "segments"]]
-        X_dev = [np.array(X_dev[source]) for source in ["ids", "masks", "segments"]]
+        X_dev   = [np.array(X_dev[source]) for source in ["ids", "masks", "segments"]]
         # X_test  = [np.array(X_test[source])  for source in ["ids", "masks", "segments"]]
 
         X_train = [
@@ -146,7 +146,7 @@ def run_model(args, model, label=""):
         ]
     elif args["current_model"] == "3BertAlgoNet":
 
-        train, dev = args["X_train"], args["X_dev"]
+        train, dev     = args["X_train"], args["X_dev"]
         X_train, X_dev = [], []
 
         for source in ["statement", "input", "output"]:

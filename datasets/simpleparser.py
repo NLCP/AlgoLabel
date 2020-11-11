@@ -77,13 +77,13 @@ def wrap_digit(token):
 
 
 def digit_parser(args, sample, content):
-    operators = ["+", "-", "/", "*", ",", "(", ")"]
-    op_map = {op: " {} ".format(op) for op in operators}
+    operators         = ["+", "-", "/", "*", ",", "(", ")"]
+    op_map            = {op: " {} ".format(op) for op in operators}
 
-    content = replace_chars(content, op_map)
-    tokens = content.split()
+    content           = replace_chars(content, op_map)
+    tokens            = content.split()
 
-    new_tokens = []
+    new_tokens        = []
     ignore_next_token = False
 
     for idx, token in enumerate(tokens):
@@ -227,7 +227,7 @@ def parse_range(stream):
         if len(tokens) == 2:
 
             start = tokens[0]
-            end = tokens[1]
+            end   = tokens[1]
 
             if (end.isdigit() or "^" in end) and not start.isdigit():
                 return "range ( {} , {} )".format(start, end)
@@ -235,8 +235,8 @@ def parse_range(stream):
         return None
 
     result["start"] = tokens[0]
-    result["end"] = tokens[-1]
-    result["vars"] = tokens[1:-1]
+    result["end"]   = tokens[-1]
+    result["vars"]  = tokens[1:-1]
 
     if len(result["vars"]) == 0:
         return None
@@ -293,7 +293,7 @@ def parse_sequence(stream):
             if result["seq"] and result["seq"] != res[0]:
                 return None
 
-            result["seq"] = res[0]
+            result["seq"]      = res[0]
             result["seq_size"] = res[1]
         else:
             break
@@ -368,7 +368,7 @@ def formula_parser(args, sample, content):
     content = "$$$ {} $$$".format(content.lower())
 
     formula_pattern = "(?<=\$\$\$)(.*?)(?=\$\$\$)"
-    formulas = re.findall(formula_pattern, content)
+    formulas        = re.findall(formula_pattern, content)
 
     for idx, chunk in enumerate(formulas):
         if idx % 2 == 1:

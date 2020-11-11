@@ -11,7 +11,7 @@ from collections import defaultdict
 
 
 def process_sentence(args, X, token_X, sent, emb_type):
-    embs = args["w2v_{}".format(emb_type)]
+    embs    = args["w2v_{}".format(emb_type)]
     unk_idx = len(args["w2v_{}_matrix".format(emb_type)]) - 2
 
     for token in sent:
@@ -61,10 +61,10 @@ def fit_input_for_w2v_code(args, sample, input):
 
 
 def pad_input_for_w2v(args, X, input, input_type):
-    encoder = input["encoder"]
-    encoder = args["encoders"][encoder]
+    encoder     = input["encoder"]
+    encoder     = args["encoders"][encoder]
     max_seq_len = encoder["max_seq_len_{}".format(input_type)]
-    pad_idx = len(args["w2v_{}_matrix".format(input_type)]) - 1
+    pad_idx     = len(args["w2v_{}_matrix".format(input_type)]) - 1
 
     X = sequence.pad_sequences(X,
                                maxlen=max_seq_len,
@@ -73,11 +73,11 @@ def pad_input_for_w2v(args, X, input, input_type):
 
 
 def pad_input(args, X, input):
-    encoder = input["encoder"]
-    encoder = args["encoders"][encoder]
+    encoder     = input["encoder"]
+    encoder     = args["encoders"][encoder]
     max_seq_len = encoder["max_seq_len"]
     sample_size = encoder["default_input_size"]
-    dtype = encoder["dtype"]
+    dtype       = encoder["dtype"]
 
     for idx, x in enumerate(X):
 
@@ -109,13 +109,13 @@ def pad_input(args, X, input):
 @fcall
 def fit_input(args, dataset):
     model_name = args["model"]
-    model = args["models"][model_name]
-    encoders = model["encoders"]
+    model      = args["models"][model_name]
+    encoders   = model["encoders"]
     input_type = encoders["input_type"]  # text / code
-    inputs = encoders["inputs"]
+    inputs     = encoders["inputs"]
 
     X, X_toks = defaultdict(list), defaultdict(list)
-    Y = []
+    Y         = []
 
     unlabeled = 0
 
@@ -139,8 +139,8 @@ def fit_input(args, dataset):
 
         for input in inputs:
 
-            scenario = args["embeddings"][input["scenario"]]
-            emb_type = scenario["emb_type"]
+            scenario   = args["embeddings"][input["scenario"]]
+            emb_type   = scenario["emb_type"]
             input_type = scenario["input_type"]
 
             if emb_type == "safe":
@@ -169,7 +169,7 @@ def fit_input(args, dataset):
     res_X, res_X_toks = [], []
     for input in inputs:
 
-        scenario = args["embeddings"][input["scenario"]]
+        scenario  = args["embeddings"][input["scenario"]]
         input_type = scenario["input_type"]
 
         if input["scenario"] == "code2vec":
@@ -204,7 +204,7 @@ def fit_input(args, dataset):
 @fcall
 def prepare_extra_supervision(args, dataset, source_embeddings):
     problem_emb = source_embeddings["problem_emb"]
-    label_emb = source_embeddings["label_emb"]
+    label_emb   = source_embeddings["label_emb"]
 
     Y = []
     for sample in tqdm(dataset):
@@ -260,11 +260,11 @@ def join_cf_dataset(args, ds_code, ds_text):
         if not "starts" in sample or not sample["starts"] or len(sample["starts"]) == 0:
             continue
 
-        sample["submission"] = sample["index"]
-        sample["index"] = sample["index"].split("_")[1]
+        sample["submission"]      = sample["index"]
+        sample["index"]           = sample["index"].split("_")[1]
         problems[sample["index"]] = sample
 
-    dataset = []
+    dataset  = []
     without_valid_code = 0
     without_valid_statement = 0
 
@@ -295,8 +295,8 @@ def join_cf_dataset(args, ds_code, ds_text):
 @fcall
 def prepare_input(args):
     model_name = args["model"]
-    model = args["models"][model_name]
-    encoders = model["encoders"]
+    model      = args["models"][model_name]
+    encoders   = model["encoders"]
     input_type = encoders["input_type"]  # text / code
 
     for split in ["train", "dev", "test"]:
@@ -315,7 +315,7 @@ def prepare_input(args):
             if args["train"]["only_cf"]:
                 dataset = keep_only_cf_sample(dataset)
 
-        X, Y = fit_input(args, dataset)
+        X, Y      = fit_input(args, dataset)
         X, X_toks = X
 
         dump_dataset("./data/models/{}/data/X_{}.json".format(model_name, split), X)

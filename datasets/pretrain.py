@@ -28,7 +28,7 @@ def load_word2vec(args, input_type):
     unk_vector = np.mean(emb_matrix, axis=0)
     pad_vector = np.zeros(size)
 
-    args["w2v_{}_matrix".format(input_type)] = np.append(emb_matrix, [unk_vector, pad_vector], axis=0)
+    args["w2v_{}_matrix".format(input_type)]     = np.append(emb_matrix, [unk_vector, pad_vector], axis=0)
     args["w2v_{}_vocab_size".format(input_type)] = args["w2v_{}_matrix".format(input_type)].shape[0]
 
 
@@ -95,8 +95,8 @@ def fill_in_ast_paths(args, settings):
     with open("./data/code/code2vec/cpp/path_contexts.csv", "r") as f:
 
         for line in f:
-            tokens = line.split()
-            id = tokens[0].split("\\")[-1].split(".cpp")[0]
+            tokens              = line.split()
+            id                  = tokens[0].split("\\")[-1].split(".cpp")[0]
             starts, paths, ends = [], [], []
 
             for path in tokens[1:]:
@@ -143,8 +143,8 @@ def fill_in_ast_paths(args, settings):
 
 
 def pretrain_embeddings(args):
-    scenario = args["embeddings"][args["pretrain"]["scenario"]]
-    settings = args["embeddings"]["framework"][scenario["emb_type"]]
+    scenario   = args["embeddings"][args["pretrain"]["scenario"]]
+    settings   = args["embeddings"]["framework"][scenario["emb_type"]]
     input_type = scenario["input_type"]
 
     if input_type == "text":

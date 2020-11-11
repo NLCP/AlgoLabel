@@ -25,7 +25,7 @@ def parse_csv(path, encoding="utf8", delimiter="\t"):
     with open(path, encoding=encoding) as f:
 
         reader = csv.reader(f, delimiter=delimiter)
-        keys = reader.__next__()
+        keys   = reader.__next__()
 
         for row in reader:
             sample = {}
@@ -57,15 +57,15 @@ def fcall(fun):
 @fcall
 def multi_process_dataset(fun, data, fargs=None, huge_data=None):
     if huge_data:
-        batch_size = huge_data
+        batch_size  = huge_data
         num_samples = len(data)
 
-        idx = 0
-        batch_idx = 0
+        idx         = 0
+        batch_idx   = 0
 
         while idx < num_samples:
             batch = data[idx:idx + batch_size]
-            temp = multi_process(fun, batch, fargs)
+            temp  = multi_process(fun, batch, fargs)
             dump_dataset("./data/tmp_batch_{}".format(batch_idx), temp)
 
             batch_idx += 1

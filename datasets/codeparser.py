@@ -47,7 +47,7 @@ def preprocess_code_samples(sample, args):
 
 def remove_unused(path, source=None):
     file_name = path.split("/")[-1]
-    log_file = "./logs/tmp/cppcheck_{}.xml".format(file_name[:-4])
+    log_file  = "./logs/tmp/cppcheck_{}.xml".format(file_name[:-4])
     cmd = "cppcheck --enable=all --xml -q --output-file=\"{}\" {}".format(log_file, path)
 
     run_system_command(cmd, verbose=False, split=False, shell=False)
@@ -56,9 +56,9 @@ def remove_unused(path, source=None):
         with open(path, "r") as f:
             source = f.read()
 
-    lines = source.split("\n")
-    tree = ET.parse(log_file)
-    root = tree.getroot()
+    lines  = source.split("\n")
+    tree   = ET.parse(log_file)
+    root   = tree.getroot()
     errors = root.find("errors")
     if not errors:
         return
@@ -68,12 +68,12 @@ def remove_unused(path, source=None):
     for error in errors.findall("error"):
 
         if error.get('id') == "unusedFunction":
-            msg = error.get('msg')
-            fun = msg.split("'")[1]
-            location = int(error.find('location').get('line')) - 1
-            count_ph = 0
+            msg          = error.get('msg')
+            fun          = msg.split("'")[1]
+            location     = int(error.find('location').get('line')) - 1
+            count_ph     = 0
             seen_the_end = False
-            index = location
+            index        = location
 
             for line in lines[location:]:
 

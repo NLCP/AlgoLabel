@@ -4,11 +4,11 @@ from collections import defaultdict
 
 @fcall
 def compute_len_stats(args):
-    model = args["model"]
+    model        = args["model"]
     model_params = args["models"][model]
-    encoders = model_params["encoders"]
-    inputs = encoders["inputs"]
-    input_type = encoders["input_type"]
+    encoders     = model_params["encoders"]
+    inputs       = encoders["inputs"]
+    input_type   = encoders["input_type"]
 
     stats = {}
     for input in inputs:
@@ -44,16 +44,16 @@ def compute_code_statistics(args, dataset):
     avg_num_solutions = 0
 
     avg_num_tokens = 0
-    avg_num_ast = 0
-    avg_safe = 0
+    avg_num_ast    = 0
+    avg_safe       = 0
 
     max_source = 0
-    max_ast = 0
-    max_safe = 0
+    max_ast    = 0
+    max_safe   = 0
 
     problems = set()
 
-    no_tags = 0
+    no_tags   = 0
     with_tags = 0
 
     for sample in dataset:
@@ -150,8 +150,8 @@ def compute_text_statistics(args, dataset):
 def compute_tag_statistics(args, dataset):
     print("Number of samples", len(dataset))
 
-    tag_distro = defaultdict(int)
-    avg_num_tags = 0
+    tag_distro           = defaultdict(int)
+    avg_num_tags         = 0
     samples_without_tags = 0
 
     for sample in dataset:

@@ -30,7 +30,7 @@ def main():
         parser.add_argument('--{}'.format(arg), action='store_true')
 
     params = parser.parse_args()
-    args = parse_config("./config.json")
+    args   = parse_config("./config.json")
 
     setup_logging(args)
     set_random_seed(args)
