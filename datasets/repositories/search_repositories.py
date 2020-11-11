@@ -4,6 +4,8 @@ from time import sleep
 import requests
 
 # Only the first 1000 search results are available, https://docs.github.com/v3/search/
+from util import load_dataset, dump_dataset
+
 GITHUB_MAX_RESULTS = 1000
 
 # Default no. of results per page
@@ -26,8 +28,7 @@ REPOSITORIES_OUTPUT_PATH = 'repositories.json'
 def main():
 
     # For further development only
-    with open(DATASET_PATH) as f:
-        data = json.load(f)
+    data = load_dataset(DATASET_PATH)
 
     # Query templates
     query_url = "https://api.github.com/search/repositories?q=%s+language:cpp&per_page=30" % (KEYWORDS)
@@ -56,8 +57,7 @@ def main():
         sleep(SLEEP_TIME_BETWEEN_API_CALLS_SEC)
 
     # Write output to REPOSITORIES_OUTPUT_PATH
-    with open(REPOSITORIES_OUTPUT_PATH, 'w') as f:
-        json.dump(git_repos, f)
+    dump_dataset(REPOSITORIES_OUTPUT_PATH, git_repos)
 
 
 if __name__ == "__main__":
