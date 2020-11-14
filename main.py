@@ -1,4 +1,3 @@
-
 import argparse
 import logging
 
@@ -14,7 +13,6 @@ from util import parse_config, setup_logging, set_random_seed
 
 
 def main():
-
     parser = argparse.ArgumentParser()
 
     arguments = [

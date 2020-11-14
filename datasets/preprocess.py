@@ -1,4 +1,3 @@
-
 import logging
 from util import load_dataset, dump_dataset, fcall, multi_process, print_defaultdict
 from tqdm import tqdm
@@ -11,7 +10,6 @@ from pprint import pprint as pp
 
 @fcall
 def preprocess_code(args, dataset):
-
     new_dataset = []
     for sample in tqdm(dataset):
         new_dataset.append(preprocess_code_samples(sample, args))
@@ -71,7 +69,6 @@ def consolidate_tags(sample, args):
 
 @fcall
 def aggregate_text(args, dataset):
-
     params = args["preprocess"]["text"]
 
     for sample in tqdm(dataset):
@@ -89,7 +86,6 @@ def aggregate_text(args, dataset):
 
 @fcall
 def aggregate_code(args, dataset):
-
     for sample in tqdm(dataset):
 
         if "solutions" not in sample or len(sample["solutions"]) == 0:
@@ -100,7 +96,6 @@ def aggregate_code(args, dataset):
 
 
 def kattis_opensource_license(args, dataset):
-
     licenses = defaultdict(int)
     new_ds   = []
 
@@ -117,7 +112,6 @@ def kattis_opensource_license(args, dataset):
 
 
 def list_of_kattis_problems(uva):
-
     titles = set()
     for sample in uva:
         if "hint" in sample:
@@ -129,7 +123,6 @@ def list_of_kattis_problems(uva):
 
 
 def filter_kattis_problem_set(kattis, overlapped):
-
     dataset = []
 
     for sample in kattis:
@@ -150,7 +143,6 @@ def filter_kattis_problem_set(kattis, overlapped):
 
 @fcall
 def preprocess_dataset(args):
-
     sources = args["sources"]
 
     args["dataset"]        = []
@@ -165,8 +157,8 @@ def preprocess_dataset(args):
     args["dataset"] = preprocess(args, uva, "uva")
 
     # Load Kattis
-    kattis           = load_dataset("./data/sources/kattis.json")
-    kattis           = filter_kattis_problem_set(kattis, kattis_overlap)
+    kattis = load_dataset("./data/sources/kattis.json")
+    kattis = filter_kattis_problem_set(kattis, kattis_overlap)
     args["dataset"] += preprocess(args, kattis, "kattis")
 
     for source in sources:
@@ -183,12 +175,3 @@ def preprocess_dataset(args):
     logging.info("[preprocess_dataset] Number of distinct formulas found: {}\n".format(len(args["formulas_count"])))
 
     dump_dataset("./data/datasets/dataset.json", args["dataset"])
-
-
-
-
-
-
-
-
-

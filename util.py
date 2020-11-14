@@ -1,4 +1,3 @@
-
 from pprint import pprint as pp
 import re, json, csv
 from nltk import word_tokenize
@@ -16,14 +15,12 @@ import numpy as np
 import random
 from subprocess import call
 
-
 tokenize_regex = re.compile("([^a-zA-Z_#$@0-9<>])")
-filtered_toks  = {'\xa0', '', ' '}
+filtered_toks = {'\xa0', '', ' '}
 non_ascii_regex = re.compile(r'[^\x00-\x7f]')
 
 
 def parse_csv(path, encoding="utf8", delimiter="\t"):
-
     dataset = []
     with open(path, encoding=encoding) as f:
 
@@ -40,9 +37,7 @@ def parse_csv(path, encoding="utf8", delimiter="\t"):
 
 
 def fcall(fun):
-
     def wrapper(*args, **kwargs):
-
         sys.stdout.write("[{}] ...\n".format(fun.__name__))
         sys.stdout.flush()
 
@@ -61,13 +56,12 @@ def fcall(fun):
 
 @fcall
 def multi_process_dataset(fun, data, fargs=None, huge_data=None):
-
     if huge_data:
         batch_size  = huge_data
         num_samples = len(data)
 
-        idx       = 0
-        batch_idx = 0
+        idx         = 0
+        batch_idx   = 0
 
         while idx < num_samples:
             batch = data[idx:idx + batch_size]
@@ -89,7 +83,6 @@ def multi_process_dataset(fun, data, fargs=None, huge_data=None):
 
 
 def multi_process(fun, data, args=None, cpus=None):
-
     if not cpus:
         pool = mp.Pool(int(mp.cpu_count()))
     else:
@@ -103,13 +96,13 @@ def multi_process(fun, data, args=None, cpus=None):
     pool.close()
     return results
 
+
 @fcall
 def parse_config():
     return load_dataset("project.json")
 
 
 def load_dataset(path):
-
     print("Load dataset {}!".format(path))
 
     if ".csv" in path or ".tsv" in path:
@@ -137,7 +130,6 @@ def cleanup_torch_model(model):
 
 
 def dump_dataset(path, data, verbose=True):
-
     if verbose:
         print("Dump dataset {}: {}!".format(path, len(data)))
 
@@ -163,7 +155,6 @@ def dump_dataset(path, data, verbose=True):
 
 
 def check_float(token):
-
     try:
         float(token)
         return True
@@ -249,7 +240,6 @@ def parse_config(path="project.json"):
 
 
 def setup_logging(args):
-
     level = {
         "info": logging.INFO,
         "debug": logging.DEBUG,

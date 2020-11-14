@@ -1,4 +1,3 @@
-
 from util import run_system_command
 import xml.etree.ElementTree as ET
 
@@ -9,7 +8,6 @@ def remove_nonascii(code):
 
 
 def preprocess_code_samples(sample, args):
-
     if "solutions" not in sample:
         sample["solutions"] = []
         return sample
@@ -27,8 +25,8 @@ def preprocess_code_samples(sample, args):
             continue
 
         solution["index"] = "{}_{}_{}".format(sample["source"],
-                                           sample["index"],
-                                           sol_idx)
+                                              sample["index"],
+                                              sol_idx)
 
         path = "./data/code/sources/{}.cpp".format(solution["index"])
         with open(path, "w") as f:
@@ -48,7 +46,6 @@ def preprocess_code_samples(sample, args):
 
 
 def remove_unused(path, source=None):
-
     file_name = path.split("/")[-1]
     log_file  = "./logs/tmp/cppcheck_{}.xml".format(file_name[:-4])
     cmd = "cppcheck --enable=all --xml -q --output-file=\"{}\" {}".format(log_file, path)
@@ -94,8 +91,3 @@ def remove_unused(path, source=None):
 
     lines = [line for idx, line in enumerate(lines) if idx not in remove_lines]
     return "\n".join(lines)
-
-
-
-
-

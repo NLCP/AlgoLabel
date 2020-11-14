@@ -1,4 +1,3 @@
-
 from preprocessing.text.util import replace_chars
 from nltk import sent_tokenize
 from parse import parse
@@ -13,12 +12,12 @@ def parse_number(token: str):
         number = int(token)
     except:
         try:
-          if len(token) > 1:
-            number = "".join([str(unicodedata.digit(ch)) for ch in token])
-          else:
-            number = unicodedata.digit(token)
+            if len(token) > 1:
+                number = "".join([str(unicodedata.digit(ch)) for ch in token])
+            else:
+                number = unicodedata.digit(token)
         except:
-          return None
+            return None
 
     return int(number)
 
@@ -78,12 +77,11 @@ def wrap_digit(token):
 
 
 def digit_parser(args, sample, content):
+    operators         = ["+", "-", "/", "*", ",", "(", ")"]
+    op_map            = {op: " {} ".format(op) for op in operators}
 
-    operators = ["+", "-", "/", "*", ",", "(", ")"]
-    op_map    = {op: " {} ".format(op) for op in operators}
-
-    content   = replace_chars(content, op_map)
-    tokens    = content.split()
+    content           = replace_chars(content, op_map)
+    tokens            = content.split()
 
     new_tokens        = []
     ignore_next_token = False
@@ -144,7 +142,6 @@ def is_index(token):
 
 
 def parse_pair(token):
-
     res = parse("( {} , {} )", token)
 
     if not res:
@@ -175,7 +172,6 @@ def has_range_delim(token):
 
 
 def parse_range(stream):
-
     result = {
         "start": None,
         "vars": [],
@@ -261,7 +257,6 @@ def parse_range(stream):
 
 
 def parse_sequence(stream):
-
     result = {
         "seq": None,
         "seq_size": None
@@ -316,7 +311,6 @@ def parse_sequence(stream):
 
 
 def parse_simple_operation(formula):
-
     tokens = formula.split()
 
     if len(tokens) == 3 and tokens[1] in {"-", "+", "*", "="}:
@@ -339,7 +333,6 @@ def parse_simple_operation(formula):
 
 
 def simplify_formula(formula):
-
     formula = formula.strip()
 
     if len(formula) == 0:
@@ -365,7 +358,6 @@ def simplify_formula(formula):
 
 
 def formula_parser(args, sample, content):
-
     if "$$$" not in content:
         return content
 
@@ -382,7 +374,7 @@ def formula_parser(args, sample, content):
         if idx % 2 == 1:
             formulas[idx] = simplify_formula(chunk)
 
-    formulas        = list(map(simplify_formula, formulas))
+    formulas = list(map(simplify_formula, formulas))
 
     for idx, formula in enumerate(formulas[1::2]):
         actual_index = 1 + idx * 2
@@ -402,7 +394,7 @@ def formula_parser(args, sample, content):
             if f not in args["formulas"]:
 
                 placeholder = " |formula{}| ".format(len(args["formulas"]))
-                args["formulas"][f]   = placeholder
+                args["formulas"][f] = placeholder
 
                 sample["formulas"][f] = placeholder
                 sample["formulas_idx"][placeholder] = f
@@ -427,14 +419,8 @@ def formula_parser(args, sample, content):
 
 
 def split_content(args, content):
-
     delims = [".", "?", "!", ",", ";"]
 
     for delim in delims:
         content = content.replace(delim, " {} ".format(delim))
     return sent_tokenize(content)
-
-
-
-
-

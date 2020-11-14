@@ -11,7 +11,6 @@ from collections import defaultdict
 
 
 def process_sentence(args, X, token_X, sent, emb_type):
-
     embs    = args["w2v_{}".format(emb_type)]
     unk_idx = len(args["w2v_{}_matrix".format(emb_type)]) - 2
 
@@ -25,20 +24,19 @@ def process_sentence(args, X, token_X, sent, emb_type):
 
 
 def fit_input_for_w2v_text(args, sample, input):
-
     if "w2v_text" not in args:
         load_word2vec(args, "text")
 
-    field       = input["field"]
+    field = input["field"]
 
     if field == "all":
         sentences = sample["sentences"]["statement"] + \
-            sample["sentences"]["input"] + \
-            sample["sentences"]["output"]
+                    sample["sentences"]["input"] + \
+                    sample["sentences"]["output"]
     else:
-        sentences   = sample["sentences"][field]
+        sentences = sample["sentences"][field]
 
-    sentences   = [filter_sentence(x) for x in sentences]
+    sentences = [filter_sentence(x) for x in sentences]
 
     X, X_tokens = [], []
 
@@ -49,9 +47,8 @@ def fit_input_for_w2v_text(args, sample, input):
 
 
 def fit_input_for_w2v_code(args, sample, input):
-
-    field      = input["field"]
-    tokens     = sample[field]
+    field = input["field"]
+    tokens = sample[field]
     input_type = "code_{}".format(field)
 
     if "w2v_{}".format(input_type) not in args:
@@ -64,7 +61,6 @@ def fit_input_for_w2v_code(args, sample, input):
 
 
 def pad_input_for_w2v(args, X, input, input_type):
-
     encoder     = input["encoder"]
     encoder     = args["encoders"][encoder]
     max_seq_len = encoder["max_seq_len_{}".format(input_type)]
@@ -77,7 +73,6 @@ def pad_input_for_w2v(args, X, input, input_type):
 
 
 def pad_input(args, X, input):
-
     encoder     = input["encoder"]
     encoder     = args["encoders"][encoder]
     max_seq_len = encoder["max_seq_len"]
@@ -113,7 +108,6 @@ def pad_input(args, X, input):
 
 @fcall
 def fit_input(args, dataset):
-
     model_name = args["model"]
     model      = args["models"][model_name]
     encoders   = model["encoders"]
@@ -145,9 +139,9 @@ def fit_input(args, dataset):
 
         for input in inputs:
 
-            scenario    = args["embeddings"][input["scenario"]]
-            emb_type    = scenario["emb_type"]
-            input_type  = scenario["input_type"]
+            scenario   = args["embeddings"][input["scenario"]]
+            emb_type   = scenario["emb_type"]
+            input_type = scenario["input_type"]
 
             if emb_type == "safe":
                 X[input["field"]].append(sample[input["field"]])
@@ -175,7 +169,7 @@ def fit_input(args, dataset):
     res_X, res_X_toks = [], []
     for input in inputs:
 
-        scenario = args["embeddings"][input["scenario"]]
+        scenario  = args["embeddings"][input["scenario"]]
         input_type = scenario["input_type"]
 
         if input["scenario"] == "code2vec":
@@ -206,9 +200,9 @@ def fit_input(args, dataset):
     # res_X = np.array(res_X).tolist()
     return (res_X, res_X_toks), Y
 
+
 @fcall
 def prepare_extra_supervision(args, dataset, source_embeddings):
-
     problem_emb = source_embeddings["problem_emb"]
     label_emb   = source_embeddings["label_emb"]
 
@@ -216,7 +210,7 @@ def prepare_extra_supervision(args, dataset, source_embeddings):
     for sample in tqdm(dataset):
 
         if sample["index"] in problem_emb:
-          Y.append(problem_emb[sample["index"]])
+            Y.append(problem_emb[sample["index"]])
         else:
             y = []
             for tag in sample["tags"]:
@@ -235,7 +229,6 @@ def prepare_extra_supervision(args, dataset, source_embeddings):
 
 @fcall
 def keep_only_cf_sample(dataset):
-
     new_dataset = []
     for sample in dataset:
         if "source" in sample:
@@ -254,7 +247,6 @@ def keep_only_cf_sample(dataset):
 
 @fcall
 def join_cf_dataset(args, ds_code, ds_text):
-
     problems = {}
 
     for sample in tqdm(ds_code):
@@ -272,7 +264,7 @@ def join_cf_dataset(args, ds_code, ds_text):
         sample["index"]           = sample["index"].split("_")[1]
         problems[sample["index"]] = sample
 
-    dataset = []
+    dataset  = []
     without_valid_code = 0
     without_valid_statement = 0
 
@@ -302,11 +294,10 @@ def join_cf_dataset(args, ds_code, ds_text):
 
 @fcall
 def prepare_input(args):
-
     model_name = args["model"]
     model      = args["models"][model_name]
     encoders   = model["encoders"]
-    input_type = encoders["input_type"]          # text / code
+    input_type = encoders["input_type"]  # text / code
 
     for split in ["train", "dev", "test"]:
 
@@ -336,4 +327,3 @@ def prepare_input(args):
             Y_extra = prepare_extra_supervision(args, dataset, source_embeddings)
             dump_dataset("./data/models/{}/data/Y_{}_source_emb.json".format(model_name, split),
                          Y_extra)
-
