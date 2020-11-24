@@ -15,46 +15,51 @@ PER_PAGE = 30
 KEYWORDS = "codeforces"
 
 # In case of failure, retry MAX_RETRY times
-MAX_RETRY = 10
+MAX_RETRY = 3
 
 # API rate limiter, https://developer.github.com/v3/#rate-limiting
 # One API call each SLEEP_TIME_BETWEEN_API_CALLS_SEC seconds
-SLEEP_TIME_BETWEEN_API_CALLS_SEC = 60
+SLEEP_TIME_BETWEEN_API_CALLS_SEC = 20
 
 DATASET_PATH = 'dataset.json'
 REPOSITORIES_OUTPUT_PATH = 'repositories.json'
 
+QUERY_URL_TEMPLATES = ["https://api.github.com/search/repositories?q=codeforces+created:<2017-01-01+language:cpp&per_page=30",
+                       "https://api.github.com/search/repositories?q=codeforces+created:2017-01-01..2018-09-01+language:cpp&per_page=30",
+                       "https://api.github.com/search/repositories?q=codeforces+created:2018-09-01..2020-01-01+language:cpp&per_page=30",
+                       "https://api.github.com/search/repositories?q=codeforces+created:2020-01-01..2020-06-01+language:cpp&per_page=30",
+                       "https://api.github.com/search/repositories?q=codeforces+created:2020-06-01..2020-10-01+language:cpp&per_page=30",
+                       "https://api.github.com/search/repositories?q=codeforces+created:>2020-10-01+language:cpp&per_page=30"
+                       ]
 
 def main():
 
-    # For further development only
-    data = load_dataset(DATASET_PATH)
-
-    # Query templates
-    query_url = "https://api.github.com/search/repositories?q=%s+language:cpp&per_page=30" % (KEYWORDS)
-    query_url_page = "https://api.github.com/search/repositories?q=%s+language:cpp&per_page=30&page=" % (KEYWORDS)
-    resp = requests.get(query_url).json()
-
     git_repos = {"repo_full_name": []}
-    NO_REQUESTS = min(int(resp["total_count"] / PER_PAGE), int(GITHUB_MAX_RESULTS / PER_PAGE))
-    for i in range(1, NO_REQUESTS + 1):
-        # Iterate NO_REQUESTS time
-        print("[ITERATION] ", i, "/", NO_REQUESTS)
-        query_url_page_formatted = query_url_page + str(i)
-        resp = requests.get(query_url_page_formatted).json()
-        retry = MAX_RETRY
-        while retry > 0 and not resp.get("items", None):
-            # Retry in case of failure, MAX_RETRY times
-            print("... [retry]", MAX_RETRY - retry + 1, "/", MAX_RETRY)
-            resp = requests.get(query_url_page + str(i)).json()
-            sleep(SLEEP_TIME_BETWEEN_API_CALLS_SEC)
-            retry = retry - 1
-        if retry == 0:
-            continue
-        for r in resp["items"]:
-            git_repos["repo_full_name"].append(r["full_name"])
 
-        sleep(SLEEP_TIME_BETWEEN_API_CALLS_SEC)
+    for query_url in QUERY_URL_TEMPLATES:
+        # Query templates
+        query_url_page = query_url + "&page="
+        resp = requests.get(query_url, auth=('raresraf', 'a9bb8139a8f766e3b66e45586fffc933d4b36c3f')).json()
+
+        NO_REQUESTS = min(int(resp["total_count"] / PER_PAGE), int(GITHUB_MAX_RESULTS / PER_PAGE))
+        for i in range(1, NO_REQUESTS + 1 + 1):
+            # Iterate NO_REQUESTS time
+            print("[ITERATION] ", i, "/", NO_REQUESTS + 1)
+            query_url_page_formatted = query_url_page + str(i)
+            resp = requests.get(query_url_page_formatted, auth=('raresraf', 'a9bb8139a8f766e3b66e45586fffc933d4b36c3f')).json()
+            retry = MAX_RETRY
+            while retry > 0 and not resp.get("items", None):
+                # Retry in case of failure, MAX_RETRY times
+                print("... [retry]", MAX_RETRY - retry + 1, "/", MAX_RETRY)
+                resp = requests.get(query_url_page + str(i), auth=('raresraf', 'a9bb8139a8f766e3b66e45586fffc933d4b36c3f')).json()
+                sleep(10 * SLEEP_TIME_BETWEEN_API_CALLS_SEC)
+                retry = retry - 1
+            if retry == 0:
+                continue
+            for r in resp["items"]:
+                git_repos["repo_full_name"].append(r["full_name"])
+
+            sleep(SLEEP_TIME_BETWEEN_API_CALLS_SEC)
 
     # Write output to REPOSITORIES_OUTPUT_PATH
     dump_dataset(REPOSITORIES_OUTPUT_PATH, git_repos)
