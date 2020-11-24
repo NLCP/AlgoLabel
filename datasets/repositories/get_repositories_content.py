@@ -9,6 +9,7 @@ command_template = "mkdir -p ./results/%s && " \
                    "git clone https://github.com/%s/%s && " \
                    "cd - "
 
+
 def execute_command(user_name, repo_name):
     subprocess.call(command_template % (user_name, user_name, user_name, repo_name), shell=True)
 
