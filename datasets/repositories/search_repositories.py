@@ -18,7 +18,7 @@ MAX_RETRY = 3
 
 # API rate limiter, https://developer.github.com/v3/#rate-limiting
 # One API call each SLEEP_TIME_BETWEEN_API_CALLS_SEC seconds
-SLEEP_TIME_BETWEEN_API_CALLS_SEC = 20
+SLEEP_TIME_BETWEEN_API_CALLS_SEC = 10
 
 DATASET_PATH = 'dataset.json'
 REPOSITORIES_OUTPUT_PATH = 'repositories.json'
@@ -30,7 +30,7 @@ QUERY_URL_TEMPLATES = [
     "https://api.github.com/search/repositories?q=codeforces+created:2020-01-01..2020-06-01+language:cpp&per_page=30",
     "https://api.github.com/search/repositories?q=codeforces+created:2020-06-01..2020-10-01+language:cpp&per_page=30",
     "https://api.github.com/search/repositories?q=codeforces+created:>2020-10-01+language:cpp&per_page=30"
-    ]
+]
 
 # For running this script, you should generate you own token
 # https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token
