@@ -23,3 +23,6 @@ This will generate `repositories.json` file containing
 ### Run sanity checks and get repositories that failed in the previous step
 1. `python3 datasets/repositories/sanity_check_repositories_content.py`
 2. You can re-run command from 1. as many times as you want. Note that some repositories from that list may have been deleted.
+
+
+### TODO:  python3 datasets/repositories/repos_to_sources.py

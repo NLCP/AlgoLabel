@@ -56,10 +56,14 @@ def remove_unused(path, source=None):
         with open(path, "r") as f:
             source = f.read()
 
-    lines  = source.split("\n")
-    tree   = ET.parse(log_file)
-    root   = tree.getroot()
-    errors = root.find("errors")
+    try:
+        lines  = source.split("\n")
+        tree   = ET.parse(log_file)
+        root   = tree.getroot()
+        errors = root.find("errors")
+    except Exception:
+        return
+
     if not errors:
         return
 
