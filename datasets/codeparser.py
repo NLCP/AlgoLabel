@@ -48,9 +48,9 @@ def preprocess_code_samples(sample, args):
 def remove_unused(path, source=None):
     file_name = path.split("/")[-1]
     log_file  = "./logs/tmp/cppcheck_{}.xml".format(file_name[:-4])
-    cmd = "cppcheck --enable=all --xml -q --output-file=\"{}\" {}".format(log_file, path)
+    cmd = "cppcheck --enable=all --xml -q --output-file=\"{}\" \"{}\"".format(log_file, path)
 
-    run_system_command(cmd, verbose=False, split=False, shell=False)
+    run_system_command(cmd, verbose=False, split=False, shell=True)
 
     if not source:
         with open(path, "r") as f:
