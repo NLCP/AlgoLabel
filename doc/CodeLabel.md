@@ -1,16 +1,26 @@
 In order to simplify the various processing scripts, 
 we use "config.json" to define the parameters of each operation.
 
-##Steps:
+## Steps:
 
-If you don't want to preprocess new data you can skip straight to step 4.
+* [Step 1 - Prepare raw code](#step-1-prepare)
+* [Step 2 - Split dataset](#step-2-split)
+* [Step 3 - Compute pre-trained embeddings](#step-3-pretrain)
+* [Step 4 - Prepare model input](#step-4-prepare-input)
+* [Step 5 - Train model](#step-5-train)
+* [Step 6 - Test model](#step-6-test)
 
-An already preprocessed version of the dataset is available [here](https://drive.google.com/drive/u/0/folders/1rCu78ouGKhjLNyHML_R_gNjBpP3Utsvl).
+Note: Preprocessing is a lengthy process, if you don't want 
+to preprocess any new data you can skip straight to step 4.
+
+The original dataset is available [here](https://drive.google.com/drive/u/0/folders/1C_1AmEIfp0ZPqPUipOn2NeXTVIj7g4NF).
+
+An already preprocessed version of the dataset for this task is available [here](https://drive.google.com/drive/u/0/folders/1rCu78ouGKhjLNyHML_R_gNjBpP3Utsvl).
 
 Pre-trained models can be downloaded [here](https://drive.google.com/drive/u/0/folders/199zT4k-pHRiZS9gnzUdCTklj_c8spSC4).
 
 
-### Step 1. Prepare
+### Step 1. Prepare <a name="step-1-prepare"></a>
 
 Preprocess raw source code data.
 
@@ -67,8 +77,8 @@ prepared_dataset = [
 ]
 ```
 
-### Step 2. Split
-Splits the preprocessed dataset in train/dev/test/unlabeled.
+### Step 2. Split <a name="step-2-split"></a>
+Splits the preprocessed dataset in 'train/dev/test/unlabeled'.
 Solutions belonging to the same problem appear in the same fold.
 
 **Command**:
@@ -90,7 +100,7 @@ Solutions belonging to the same problem appear in the same fold.
 Four files in the same folder as the original dataset. 
 (e.g. "dataset_train.json", "dataset_test.json", "dataset_dev.json", "dataset_unlabeled.json")
 
-Each files contains is of the form:
+Every file follows this structure:
 
 ```
 train = [
@@ -103,10 +113,10 @@ train = [
 ]
 ```
 
-### Step 3. Pretrain
+### Step 3. Pretrain <a name="step-3-pretrain"></a>
 
 Computes several types of source code embeddings, depending on the value of the "pretrain" parameter
-in config.json.
+in 'config.json'.
 
 **Command**: 
 	
@@ -116,9 +126,9 @@ in config.json.
 
 	"pretrain" - Valid values can be inspected in "features/scenarios".
 
-Currently, we account for three types of features, that require special preprocessing: 
+Currently, we account for three types of source code features/embeddings: 
 
-#### Step 3.1 Set "pretrain" == "word2vec_code" in config.json
+#### Step 3.1 Set "pretrain" == "word2vec_code" in 'config.json'
 
 Additional parameters:
 
@@ -156,7 +166,7 @@ What it does:
 * Uses a [pretrained SAFE model](https://github.com/gadiluna/SAFE) to compute embeddings for each function in the available source files
 * Note that the available model is built using a Tensorflow version <2.
 
-### Step 4. Prepare Input
+### Step 4. Prepare Input <a name="step-4-prepare-input"></a>
 
 Compute Keras compatible input representations for each feature type according to the selected model.
 Model configurations allow for many customization options.
@@ -178,13 +188,14 @@ Any model name described in "models/" (config.json), e.g. "AlgoNetCode"
 Input and gold target samples for the chosen model, stored in "data/models/[model_name]/data/"
 for each split.
 
-### Step 5. Train
+### Step 5. Train <a name="step-5-train"></a>
 
 **Command:**
 	
 	"python ./main.py --train"
 
 **Parameter** (config.json): 
+
 	"model" - the name of the model
 	"load_weight_from_epoch" - load weights from a custom epoch
 	"train/num_epochs"
@@ -194,12 +205,14 @@ for each split.
 
 Trained Models are stored in "data/models/[model_name]"
 
-### Step 6. Test
+### Step 6. Test <a name="step-6-test"></a>
 
 Uses the "test" split in "data/models/[model_name]/data/" to evaluate the model.
 
 Model weights are loaded from "data/models/[model_name]" according to the
-"load_weight_from_epoch" parameter (by default, )
+"load_weight_from_epoch" parameter (by default, the value "num_epochs" is used)
+
+Results and model configuration are also saved in "/logs/[model_name]_log".
 
 **Command:**
 	
