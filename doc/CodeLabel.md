@@ -17,8 +17,9 @@ The original dataset is available [here](https://drive.google.com/drive/u/0/fold
 
 An already preprocessed version of the dataset for this task is available [here](https://drive.google.com/drive/u/0/folders/1rCu78ouGKhjLNyHML_R_gNjBpP3Utsvl).
 
-Pre-trained models can be downloaded [here](https://drive.google.com/drive/u/0/folders/199zT4k-pHRiZS9gnzUdCTklj_c8spSC4).
+Pre-trained embeddings can be downloaded [here](https://drive.google.com/drive/u/0/folders/1y1Q2jpJEeYOZfqFBFe5iTxOdCehBpNRZ).
 
+Pre-trained models can be downloaded [here](https://drive.google.com/drive/u/0/folders/199zT4k-pHRiZS9gnzUdCTklj_c8spSC4).
 
 ### Step 1. Prepare <a name="step-1-prepare"></a>
 
@@ -155,6 +156,11 @@ What it does:
 * Each path context is a tuple which consists of (start_token_id, path_index, end_token_id).
 * Matches path contexts from the "dev"/"test" split to the indexes in "train".
 
+Output:
+
+* Adds a list "code2vec" with the computed path context information. Sources in the dev/test split
+use the indexes from the train split.
+  
 #### Step 3.3. Set "pretrain" = "safe"
 
 Additional Parameters: 
@@ -165,6 +171,10 @@ What it does:
 
 * Uses a [pretrained SAFE model](https://github.com/gadiluna/SAFE) to compute embeddings for each function in the available source files
 * Note that the available model is built using a Tensorflow version <2.
+
+Output:
+
+* Adds a list "safe" with the computed SAFE embeddings for each function in 'code'.  
 
 ### Step 4. Prepare Input <a name="step-4-prepare-input"></a>
 

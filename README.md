@@ -100,7 +100,7 @@ Pre-trained models can be downloaded [here](https://drive.google.com/drive/u/0/f
 
 #### Code Label Results
 
-Targets labels: math, implementation, graphs, dp & greedy. 
+Targets labels: 'math', 'implementation', 'graphs', 'dp & greedy'. 
 
 | Model                               | F1 (micro-avg.) |
 | ---------- | ---------------- |
