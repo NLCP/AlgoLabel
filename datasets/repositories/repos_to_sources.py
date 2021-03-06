@@ -4,7 +4,7 @@ import os
 import re
 from shutil import copyfile
 
-from datasets.codeparser import remove_nonascii, remove_unused
+from datasets.backup.codeparser import remove_nonascii, remove_unused
 from util import run_system_command
 
 code_dict = {}

@@ -1,263 +1,255 @@
-from util import fcall, load_dataset, tf_gpu_housekeeping
-import numpy as np
 
-from sklearn.metrics import classification_report, roc_auc_score, hamming_loss
-from models.backup.algonet import build_algonet, build_algohan
-from models.backup.bert import build_bert_model, build_3bert_model
-from logs.utils import save_result_log
+from util import load_dataset, dump_dataset, fcall, multi_process
+from util import ensure_path
 
-from tensorflow import convert_to_tensor, int32
-from keras.callbacks import TensorBoard
-from keras.callbacks.callbacks import EarlyStopping, ModelCheckpoint
+from models.classifiers.algolabel import AlgoLabel
 
+from datasets.source_dataset import SourceDataset
+from datasets.source_dataset import prepare as source_prepare
+from datasets.source_dataset import save_code2vec_index, match_ast_data
+
+from models.embeddings.word2vec import Word2VecEmbedding
+from pathlib import Path
 import logging
 
-from models.algolabel import AlgoLabel
+from safe.safe import prepare_dataset as compute_safe_embeddings
+from safe.safe import SAFE
+from datasets.pipeline import SourcePipeline
+import numpy as np
 
 
-@fcall
-def evaluate_model(args, model, label=""):
-    X_test = args["X_test"]
-    Y_test = np.array(args["Y_test"])
+def identify_model(args):
 
-    if args["current_model"] == "AlgoNet":
-        X_test = [X_test[0], X_test[1], X_test[2]]
-    elif args["current_model"] == "AlgoHan":
-        X_test = np.array(args["X_test"])
-    elif args["current_model"] == "BertAlgoNet":
-        X_test = [np.array(X_test[source]) for source in ["ids", "masks", "segments"]]
-    elif args["current_model"] == "3BertAlgoNet":
-        X_test = []
-        for source in ["statement", "input", "output"]:
-            for input_type in ["ids", "masks", "segments"]:
-                X_test.append(np.array(args["X_test"][source][input_type]))
-
-    model_path = "./data/models/{}".format(args["current_model"])
-    model.load_weights(model_path + "/epoch_{}.h5".format(args["num_epochs"]))
-
-    model_params = args["models"][args["current_model"]]
-    if "word_attention" in model_params and model_params["word_attention"]:
-        Y_pred, statement_att, input_att, output_att = model.predict(X_test)
-    elif "sent_attention" in model_params and model_params["sent_attention"]:
-        Y_pred, sent_att = model.predict(X_test)
-    else:
-        Y_pred = model.predict(X_test)
-
-    targets = args["split_dataset"]["targets"]
-
-    # test_data = load_dataset("./data/test.json")
-    # for idx, (y_test, y_pred) in enumerate(zip(Y_test, Y_pred)):
-    #
-    #     if y_pred[2] < 0.5 and y_test[2] == 1:
-    #         print("[graph classification error]")
-    #         print("Statement\n{}\n**Input**\n{}\n**Output**\n{}\n**Gold Tags**\n{}\nUrl{}".format(test_data[idx]["statement"],
-    #                                                                            test_data[idx]["input"],
-    #                                                                            test_data[idx]["output"],
-    #                                                                            test_data[idx]["tags"],
-    #                                                                            test_data[idx]["url"]))
-    #         print("           {}\n".format(targets))
-    #         print("Prediction {}\nFinal {}\nGold {}\n".format(y_pred, y_pred >= 0.4, y_test))
-    #         print("\n")
-
-    difficulty_distro = {
-        "Easy": ([], []),
-        "Medium": ([], []),
-        "Hard": ([], [])
+    type_map = {
+        "AlgoSourceLabel": AlgoLabel
     }
 
-    test_data = load_dataset("./data/datasets/test.json")
-    for idx, (y_test, y_pred) in enumerate(zip(Y_test, Y_pred)):
-        sample     = test_data[idx]
-        difficulty = sample["difficulty"]
-
-        test, pred = difficulty_distro[difficulty]
-        test.append(y_test)
-        pred.append(y_pred)
-
-    def compute_results(test_res, pred_res, ds):
-
-        print("Computing results for the {} dataset!".format(ds))
-
-        auc = roc_auc_score(test_res, pred_res)
-        print("ROC-AUC: {}".format(auc))
-
-        pred_res[pred_res < 0.4]  = 0
-        pred_res[pred_res >= 0.4] = 1
-
-        hamming = hamming_loss(test_res, pred_res)
-        print("Hamming Loss {}".format(hamming))
-
-        result = classification_report(test_res, pred_res, target_names=targets)
-        print(result)
-
-        save_result_log(args,
-                        result, {
-                            "AUC": auc,
-                            "Hamming": hamming,
-                        },
-                        ds=ds
-                        )
-
-    compute_results(Y_test, Y_pred, "full")
-
-    for diff in difficulty_distro:
-        compute_results(np.array(difficulty_distro[diff][0]),
-                        np.array(difficulty_distro[diff][1]),
-                        diff)
+    try:
+        return type_map[args["model"]](args)
+    except KeyError:
+        raise NotImplementedError("Unrecognized model type {}!".format(args["model"]))
 
 
-@fcall
-def run_model(args, model, label=""):
-    model_path = "./data/models/{}".format(args["current_model"])
+def identify_data_handler(args):
 
-    if args["load_weights_from_epoch"]:
-        print("load weights from epoch {}".format(args["load_weights_from_epoch"]))
-        model.load_weights(model_path + "/epoch_{}.h5".format(args["load_weights_from_epoch"]))
+    handler_map = {
+        "SourceDataset": SourceDataset
+    }
+
+    try:
+        return handler_map[args["prepare"]["handler"]]
+    except KeyError:
+        raise NotImplementedError("Unrecognized data handler type {}!".format(args["model"]))
+
+
+def extract_root_path(path):
+    return path.split(".json")[0]
+
+
+def prepare_dataset_parallel(args, dataset):
+
+    if args["prepare"]["handler"] == "SourceDataset":
+
+        handler = SourceDataset(args, dataset)
+        dataset = handler.filter_irrelevant_tasks()
+        logging.debug("Preparing sources for {} problems..".format(len(dataset)))
+
+        dataset = multi_process(source_prepare,
+                                dataset,
+                                args,
+                                cpus=4,
+                                batch_size=args["prepare"]["batch_size"])
     else:
-        args["load_weights_from_epoch"] = 0
+        raise NotImplementedError("Handler not available")
 
-    X_train, Y_train = args["X_train"], args["Y_train"]
-    X_dev, Y_dev     = args["X_dev"], args["Y_dev"]
-    X_test, Y_test   = args["X_test"], args["Y_test"]
+    dataset = [sample for sample in dataset if sample]
+    return dataset
 
-    if args["current_model"] == "AlgoHan":
-        X_train = np.array(X_train)
-        X_dev   = np.array(X_dev)
-        X_test  = np.array(X_test)
-    elif args["current_model"] == "AlgoNet":
-        X_train = [X_train[0], X_train[1], X_train[2]]
-        X_dev   = [X_dev[0], X_dev[1], X_dev[2]]
-        X_test  = [X_test[0], X_test[1], X_test[2]]
-    elif args["current_model"] == "BertAlgoNet":
-        X_train = [np.array(X_train[source]) for source in ["ids", "masks", "segments"]]
-        X_dev   = [np.array(X_dev[source]) for source in ["ids", "masks", "segments"]]
-        # X_test  = [np.array(X_test[source])  for source in ["ids", "masks", "segments"]]
 
-        X_train = [
-            convert_to_tensor(X_train[0], dtype=int32, name="input_word_ids"),
-            convert_to_tensor(X_train[1], dtype=int32, name="input_mask"),
-            convert_to_tensor(X_train[2], dtype=int32, name="input_type_ids")
-        ]
+@fcall
+def preprocess_dataset(args):
 
-        X_dev = [
-            convert_to_tensor(X_dev[0], dtype=int32, name="input_word_ids"),
-            convert_to_tensor(X_dev[1], dtype=int32, name="input_mask"),
-            convert_to_tensor(X_dev[2], dtype=int32, name="input_type_ids")
-        ]
-    elif args["current_model"] == "3BertAlgoNet":
+    dataset = load_dataset(args["raw_dataset"])
+    # dataset = dataset[:len(dataset) - 9:-1]
+    # print(len(dataset))
 
-        train, dev     = args["X_train"], args["X_dev"]
-        X_train, X_dev = [], []
+    handler = identify_data_handler(args)
 
-        for source in ["statement", "input", "output"]:
-            for input_type in ["ids", "masks", "segments"]:
-                X_train.append(np.array(train[source][input_type]))
-                X_dev.append(np.array(dev[source][input_type]))
-
+    if args["prepare"]["parallel"]:
+        dataset = prepare_dataset_parallel(args, dataset)
     else:
-        print("[run_model] Unsupported model! {}".format(args["current_model"]))
-        exit(1)
+        # Custom dataset preprocessing module
+        dataset = handler(args, dataset).prepare()
 
-    es = EarlyStopping(monitor='val_dense_2_accuracy',
-                       mode='max',
-                       patience=args["patience"],
-                       verbose=1,
-                       min_delta=0.001)
-
-    mc = ModelCheckpoint(model_path + "/epoch_{epoch:02d}_val_loss_{val_loss:.2f}.h5",
-                         monitor='val_dense_2_accuracy',
-                         mode='max',
-                         save_best_only=True,
-                         verbose=1)
-
-    tb = TensorBoard(log_dir="./logs/tensorboard",
-                     histogram_freq=0,
-                     update_freq='epoch',
-                     )
-
-    history = model.fit(X_train, Y_train,
-                        validation_data=(X_dev, Y_dev),
-                        epochs=args["num_epochs"] - args["load_weights_from_epoch"],
-                        batch_size=args["batch_size"],  # 32
-                        callbacks=[es, tb],
-                        shuffle=True,
-                        verbose=2)
-
-    model.save_weights(model_path + "/epoch_{}.h5".format(args["num_epochs"]))
-    evaluate_model(args, model, label)
-
-    scores = model.evaluate(X_test, Y_test, verbose=1)
-    logging.info(scores)
-
-
-def build_model(args):
-    if args["current_model"] == "AlgoNet":
-        return build_algonet(args)
-    elif args["current_model"] == "AlgoHan":
-        return build_algohan(args)
-    elif args["current_model"] == "BertAlgoNet":
-        return build_bert_model(args)
-    elif args["current_model"] == "3BertAlgoNet":
-        return build_3bert_model(args)
-
-    print("Unrecognized model type! {}".format(args["current_model"]))
-    exit(1)
+    root_path = extract_root_path(args["raw_dataset"])
+    new_path  = "{}_prepared.json".format(root_path)
+    handler(args, dataset).serialize(new_path)
 
 
 @fcall
-def setup_model(args, extract=False, extra_supervision=False):
-    solution = AlgoLabel(args)
-    solution.build_model(extract=extract, extra_supervision=extra_supervision)
-    solution.setup_weights()
-    return solution
+def split_dataset(args):
+
+    root_path = extract_root_path(args["raw_dataset"])
+    new_path  = "{}_prepared.json".format(root_path)
+    dataset   = load_dataset(new_path)
+
+    # Custom dataset preprocessing module
+    handler = identify_data_handler(args)
+    dataset = handler(args, dataset)
+
+    # Split train/dev/test
+    data_split = dataset.split_data(verbose=True)
+
+    for key in data_split:
+        split_path = "{}_{}.json".format(root_path, key)
+        dump_dataset(split_path, data_split[key])
+
+
+def _prepare_word2vec(args, params):
+
+    # Pretrain Word2Vec embeddings for the specified input field
+
+    embedding = Word2VecEmbedding(args,
+                                  input_type=params["input"],
+                                  input_field=params["field"])
+    root_path = extract_root_path(args["raw_dataset"])
+
+    train_path = "{}_train.json".format(root_path)
+    train = load_dataset(train_path)
+
+    unlab_path = "{}_unlabeled.json".format(root_path)
+    unlabeled = load_dataset(unlab_path)
+
+    X = train + unlabeled
+    embedding.pretrain(X)
+
+
+def _prepare_code2vec(args, params):
+
+    root_path = extract_root_path(args["raw_dataset"])
+    path_contexts = {}
+
+    datasets = {}
+
+    def compute_fold_path(label):
+        return "{}_{}.json".format(root_path, label)
+
+    for fold in ["dev", "test", "train"]:
+        fold_path = compute_fold_path(fold)
+        datasets[fold] = load_dataset(fold_path)
+
+        destination = Path.cwd() / "data" / "code" / fold
+
+        dataset = SourceDataset(args, datasets[fold])
+        result = dataset.preprocess_ast(path=destination,
+                                        force_rewrite=False)
+        path_contexts[fold] = result
+
+    train_data = path_contexts["train"]
+    for fold in ["dev", "test"]:
+        fold_data = match_ast_data(path_contexts[fold], train_data)
+        dataset   = save_code2vec_index(datasets[fold], fold_data, fold)
+        dump_dataset(compute_fold_path(fold), dataset)
+
+    dataset = save_code2vec_index(datasets["train"], train_data, "train")
+    dump_dataset(compute_fold_path("train"), dataset)
+
+
+def _prepare_safe(args, params):
+
+    params    = args["features"]["types"]["safe"]
+    safe      = SAFE(params["model"], params["instr_conv"], params["max_instr"])
+    root_path = extract_root_path(args["raw_dataset"])
+
+    for ds_type in ["test", "dev", "train"]:
+        path = "{}_{}.json".format(root_path, ds_type)
+        data = load_dataset(path)
+        data = compute_safe_embeddings(args, safe, data)
+        dump_dataset(path, data)
 
 
 @fcall
-def load_input(args, load_tokens=False, load_extra_supervision=False):
-    model_name = args["model"]
-    print("Load tokens:", load_tokens)
-    print("Load extra supervision:", load_extra_supervision)
+def prepare_embeddings(args):
 
-    for split in ["train", "dev", "test"]:
+    scenario = args["pretrain"]
+    params   = args["features"]["scenarios"][scenario]
 
-        args["X_{}".format(split)] = load_dataset(
-            "./data/models/{}/data/X_{}.json".format(model_name, split))
+    if params["type"] == "word2vec":
+        _prepare_word2vec(args, params)
+    elif params["type"] == "code2vec":
+        _prepare_code2vec(args, params)
+    elif params["type"] == "safe":
+        _prepare_safe(args, params)
+    else:
+        raise NotImplementedError()
 
-        args["Y_{}".format(split)] = np.array(load_dataset(
-            "./data/models/{}/data/Y_{}.json".format(model_name, split)))
 
-        if load_tokens:
-            args["X_toks_{}".format(split)] = load_dataset(
-                "./data/models/{}/data/X_toks_{}.json".format(model_name, split))
+def get_model_path(args):
+    res_path = Path.cwd() / "data" / "models" / args["model"] / "data"
+    ensure_path(res_path)
+    return res_path
 
-        if load_extra_supervision:
-            args["Y_{}_source_emb".format(split)] = np.array(load_dataset(
-                "./data/models/{}/data/Y_{}_source_emb.json".format(model_name, split)
-            ))
+@fcall
+def prepare_input(args):
+
+    pipeline  = SourcePipeline(args).init_from_model_config()
+    res_path  = get_model_path(args)
+
+    root_path = extract_root_path(args["raw_dataset"])
+    for ds_type in ["test", "dev", "train"]:
+        path  = "{}_{}.json".format(root_path, ds_type)
+        data  = load_dataset(path)
+        X, Y  = pipeline.run(data)
+
+        if isinstance(X, tuple):
+            X, X_meta = X
+            meta_path = res_path / "X_{}_meta.json".format(ds_type)
+            dump_dataset(meta_path, X_meta)
+
+        if len(X[0]) != len(Y):
+            logging.critical("X num samples - {} \n".format(len(X[0])))
+            logging.critical("Y num samples - {} \n".format(len(Y)))
+            logging.critical("Total num samples - {}\n".format(len(data)))
+            raise Exception("Mismatch between number of input and output samples")
+
+        input_path  = res_path / "X_{}.json".format(ds_type)
+        dump_dataset(input_path, X)
+
+        output_path = res_path / "Y_{}.json".format(ds_type)
+        dump_dataset(output_path, Y)
+
+
+@fcall
+def setup_model(args):
+    model = AlgoLabel(args)
+    model.build_model()
+    model.load_weights()
+    return model
+
+
+@fcall
+def load_model_input(args, fold):
+
+    logging.info("Loading preprocessed {} dataset".format(fold))
+    path = get_model_path(args)
+    X = load_dataset(path / "X_{}.json".format(fold))
+    Y = load_dataset(path / "Y_{}.json".format(fold))
+    return X, np.array(Y)
 
 
 @fcall
 def train(args):
-    tf_gpu_housekeeping()
-    model = setup_model(args, extract=False, extra_supervision=args["train"]["extra_supervision"])
-    load_input(args, load_tokens=False, load_extra_supervision=args["train"]["extra_supervision"])
-    model.train()
-    model.test()
+    model         = setup_model(args)
+    train_dataset = load_model_input(args, "train")
+    dev_dataset   = load_model_input(args, "dev")
+    model.fit(train_dataset, dev_dataset)
+
+    test_dataset  = load_model_input(args, "test")
+    model.score(test_dataset)
 
 
 @fcall
 def test(args):
-    tf_gpu_housekeeping()
     model = setup_model(args)
-    load_input(args)
-    model.test()
-
-
-@fcall
-def extract_embeddings(args):
-    tf_gpu_housekeeping()
-    model = setup_model(args, extract=True)
-    load_input(args)
-
-    for split in ["train", "dev", "test"]:
-        model.extract_embeddings(split)
+    test_dataset  = load_model_input(args, "test")
+    model.score(test_dataset)

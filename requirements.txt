@@ -1,0 +1,13 @@
+tensorflow
+sklearn
+numpy
+scipy
+matplotlib
+tqdm
+r2pipe
+pyfiglet
+torch
+nltk
+keras
+gensim
+scikit-multilearn
