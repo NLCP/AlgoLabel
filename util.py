@@ -378,7 +378,7 @@ def set_random_seed(args):
 
 
 def run_system_command(cmd: str,
-                       shell: bool = True,
+                       shell: bool = False,
                        err_msg: str = None,
                        verbose: bool = True,
                        split: bool = True,

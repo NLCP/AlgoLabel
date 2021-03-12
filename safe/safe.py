@@ -79,8 +79,13 @@ def extract_safe_embeddings(safe, source):
     if not path.exists(binary_path) or result:
         return None
 
-    embeddings = [x for x in safe.embedd_functions(binary_path) if x]
-    return embeddings
+    try:
+        embeddings = safe.embedd_functions(str(binary_path))
+        embeddings = [x.tolist()[0] for x in embeddings if x is not None]
+        return embeddings
+    except Exception as e:
+        logging.debug("Exception while running SAFE model: {}".format(str(e)))
+        return None
 
 
 @fcall

@@ -181,6 +181,8 @@ Output:
 Compute Keras compatible input representations for each feature type according to the selected model.
 Model configurations allow for many customization options.
 
+By default, the scripts expects the train/dev/test files to be in "./data/datasets/" 
+
 **Command:**
 	
 	"python ./main.py --prepare_input"

@@ -267,7 +267,7 @@ class AlgoLabel(Model):
         return model
 
     def serialize(self, path: Path):
-        ensure_path(str(path.parent))
+        ensure_path(path.parent)
         self.model.save_weights(str(path))
 
     def deserialize(self, path: str):

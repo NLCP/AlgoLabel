@@ -528,8 +528,11 @@ class SourceDataset(Dataset):
         if force_rewrite:
             remove_folder(path / "sources")
 
-        sources_path = ensure_path(path / "sources")
-        result_path  = ensure_path(path / "contexts")
+        sources_path = path / "sources"
+        ensure_path(sources_path)
+
+        result_path = path / "contexts"
+        ensure_path(result_path)
 
         # TODO: check weird race condition
         # print(os.path.exists(path / "sources"))

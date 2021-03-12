@@ -189,6 +189,7 @@ def get_model_path(args):
     ensure_path(res_path)
     return res_path
 
+
 @fcall
 def prepare_input(args):
 
@@ -198,6 +199,10 @@ def prepare_input(args):
     root_path = extract_root_path(args["raw_dataset"])
     for ds_type in ["test", "dev", "train"]:
         path  = "{}_{}.json".format(root_path, ds_type)
+        if not os.path.exists(path):
+            logging.critical("Expected {} file in path {}.".format(ds_type, path))
+            exit(1)
+
         data  = load_dataset(path)
         X, Y  = pipeline.run(data)
 
