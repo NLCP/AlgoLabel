@@ -10,7 +10,13 @@
   },
   "prepare": {
     "handler": "SourceDataset",
-    "text": {},
+    "text": {
+      "fields": {
+        "statement": true,
+        "input": true,
+        "output": true
+      }
+    },
     "source": {
       "min_num_lines": 300,
       "remove_unused_fcalls": true,

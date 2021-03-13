@@ -5,6 +5,7 @@ from util import ensure_path
 from models.classifiers.algolabel import AlgoLabel
 
 from datasets.source_dataset import SourceDataset
+from datasets.text_dataset   import TextDataset
 from datasets.source_dataset import prepare as source_prepare
 from datasets.source_dataset import save_code2vec_index, match_ast_data
 
@@ -16,6 +17,7 @@ from safe.safe import prepare_dataset as compute_safe_embeddings
 from safe.safe import SAFE
 from datasets.pipeline import SourcePipeline
 import numpy as np
+import os
 
 
 def identify_model(args):
@@ -33,7 +35,8 @@ def identify_model(args):
 def identify_data_handler(args):
 
     handler_map = {
-        "SourceDataset": SourceDataset
+        "SourceDataset": SourceDataset,
+        "TextDataset": TextDataset
     }
 
     try:
@@ -70,9 +73,6 @@ def prepare_dataset_parallel(args, dataset):
 def preprocess_dataset(args):
 
     dataset = load_dataset(args["raw_dataset"])
-    # dataset = dataset[:len(dataset) - 9:-1]
-    # print(len(dataset))
-
     handler = identify_data_handler(args)
 
     if args["prepare"]["parallel"]:
