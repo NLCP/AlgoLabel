@@ -366,7 +366,7 @@ class SourceDataset(Dataset):
 
         return tokens
 
-    def flatten_solutions(self, dataset):
+    def flatten_samples(self, dataset):
         """
         The original dataset is a nested list of problems, each problem having a list of solutions.
         This functions returns a simple list, containing only solutions.
@@ -385,44 +385,44 @@ class SourceDataset(Dataset):
                     result.append(solution)
         return result
 
-    @fcall
-    def split_data(self, verbose=True):
-
-        '''
-        Split dataset in separate training/validation/test datasets.
-        Solutions belonging to the same problem are split together.
-        :return:
-        '''
-
-        params  = self.args["split"]
-        labels  = params["labels"]
-
-        np.random.shuffle(self.data)
-
-        labeled, unlabeled = self.separate_unlabeled_samples(labels)
-
-        if params["difficulty_based"]:
-            distribution = self.split_on_difficulty(labeled)
-            dataset = distribution["Easy"] + distribution["Medium"] + distribution["Hard"]
-            train, dev, test = self.split_stratified(dataset)
-            train += distribution["Various"]
-        else:
-            train, dev, test = self.split_stratified(labeled)
-
-        data_split = {
-            "train": self.flatten_solutions(train),
-            "dev": self.flatten_solutions(dev),
-            "test": self.flatten_solutions(test),
-            "unlabeled": self.flatten_solutions(unlabeled)
-        }
-
-        if verbose:
-            for split in data_split:
-                if split != "unlabeled":
-                    logging.info("Stats for the {} data split:".format(split))
-                    self.compute_tag_distribution(data_split[split])
-
-        return data_split
+    # @fcall
+    # def split_data(self, verbose=True):
+    #
+    #     '''
+    #     Split dataset in separate training/validation/test datasets.
+    #     Solutions belonging to the same problem are split together.
+    #     :return:
+    #     '''
+    #
+    #     params  = self.args["split"]
+    #     labels  = params["labels"]
+    #
+    #     np.random.shuffle(self.data)
+    #
+    #     labeled, unlabeled = self.separate_unlabeled_samples(labels)
+    #
+    #     if params["difficulty_based"]:
+    #         distribution = self.split_on_difficulty(labeled)
+    #         dataset = distribution["Easy"] + distribution["Medium"] + distribution["Hard"]
+    #         train, dev, test = self.split_stratified(dataset)
+    #         train += distribution["Various"]
+    #     else:
+    #         train, dev, test = self.split_stratified(labeled)
+    #
+    #     data_split = {
+    #         "train": self.flatten_solutions(train),
+    #         "dev": self.flatten_solutions(dev),
+    #         "test": self.flatten_solutions(test),
+    #         "unlabeled": self.flatten_solutions(unlabeled)
+    #     }
+    #
+    #     if verbose:
+    #         for split in data_split:
+    #             if split != "unlabeled":
+    #                 logging.info("Stats for the {} data split:".format(split))
+    #                 self.compute_tag_distribution(data_split[split])
+    #
+    #     return data_split
 
     def _extract_ast(self, sources_path, result_path, force_rewrite=False):
 

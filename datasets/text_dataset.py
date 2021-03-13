@@ -27,6 +27,9 @@ class TextDataset(Dataset):
 
         result = []
         for sample in self.data:
+            if "contest_name" in sample and "April Fools" in sample["contest_name"]:
+                continue
+
             for field in self.fields:
                 if field not in sample:
                     break
@@ -70,7 +73,7 @@ class TextDataset(Dataset):
                     number = "".join([str(unicodedata.digit(ch)) for ch in token])
                 else:
                     number = unicodedata.digit(token)
-            except Exception:
+            except ValueError:
                 return None
 
         return int(number)
@@ -442,3 +445,10 @@ class TextDataset(Dataset):
             sample["sentences"][field] = TextDataset._split_content(sample[field])
 
         return sample
+
+    def flatten_samples(self, dataset):
+
+        for sample in dataset:
+            if "solutions" in sample:
+                del sample["solutions"]
+        return dataset

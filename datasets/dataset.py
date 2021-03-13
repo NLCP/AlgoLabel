@@ -16,7 +16,48 @@ class Dataset(object):
     def prepare(self):
         raise NotImplementedError()
 
-    def split_data(self):
+    def split_data(self, verbose=True):
+        '''
+        Split dataset in separate training/validation/test datasets.
+        :return:
+        '''
+
+        params = self.args["split"]
+        labels = params["labels"]
+
+        np.random.shuffle(self.data)
+
+        labeled, unlabeled = self.separate_unlabeled_samples(labels)
+
+        if params["difficulty_based"]:
+            distribution = self.split_on_difficulty(labeled)
+            dataset = distribution["Easy"] + distribution["Medium"] + distribution["Hard"]
+            train, dev, test = self.split_stratified(dataset)
+            train += distribution["Various"]
+        else:
+            train, dev, test = self.split_stratified(labeled)
+
+        data_split = {
+            "train"    : self.flatten_samples(train),
+            "dev"      : self.flatten_samples(dev),
+            "test"     : self.flatten_samples(test),
+            "unlabeled": self.flatten_samples(unlabeled)
+        }
+
+        if verbose:
+            for split in data_split:
+                if split != "unlabeled":
+                    logging.info("Stats for the {} data split:".format(split))
+                    self.compute_tag_distribution(data_split[split])
+
+        return data_split
+
+    def flatten_samples(self, dataset):
+        """
+            Remove irrelevant fields from samples and
+            create separate distinct samples if necessary
+            (e.g. list<list<solutions>> -> list<solutions>)
+        """
         raise NotImplementedError()
 
     def serialize(self, ds_path=None):

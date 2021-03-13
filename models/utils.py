@@ -107,8 +107,9 @@ def split_dataset(args):
 
 def _prepare_word2vec(args, params):
 
-    # Pretrain Word2Vec embeddings for the specified input field
-
+    """
+        Pretrain Word2Vec embeddings for the specified input field(s)
+    """
     embedding = Word2VecEmbedding(args,
                                   input_type=params["input"],
                                   input_field=params["field"])

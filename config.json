@@ -62,6 +62,11 @@
       }
     },
     "scenarios": {
+      "word2vec_text": {
+        "type": "word2vec",
+        "input": "text",
+        "field": "text"
+      },
       "word2vec_code": {
         "type": "word2vec",
         "input": "code",
@@ -79,7 +84,7 @@
       }
     }
   },
-  "pretrain": "code2vec",
+  "pretrain": "word2vec_text",
   "encoders": {
     "lstm": {
       "hidden_size": 100,

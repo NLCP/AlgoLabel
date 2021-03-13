@@ -29,6 +29,12 @@ class Word2VecEmbedding(Embedding):
         self.model      = None
 
         self.input_field = input_field
+
+        # Text inputs share the same embeddings
+        if self.input_field == "text":
+            text_fields       = self.args["prepare"]["text"]["fields"]
+            self.input_fields = [field for field in text_fields
+                                 if text_fields[field]]
         if not input_field:
             raise NotImplementedError("Word2Vec embedding - input_field not defined")
 
@@ -62,7 +68,17 @@ class Word2VecEmbedding(Embedding):
     @fcall
     def pretrain(self, X):
 
-        inputs = [sample[self.input_field] for sample in X]
+        if self.input_field == "text":
+            inputs = []
+            for sample in X:
+                for field in self.input_fields:
+                    if not field in sample:
+                        print(sample)
+                        exit(0)
+                    inputs.append(sample[field])
+        else:
+            inputs = [sample[self.input_field] for sample in X]
+
         logging.info("Number of samples: {}!".format(len(inputs)))
 
         np.random.shuffle(inputs)
