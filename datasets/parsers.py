@@ -6,11 +6,11 @@ import numpy as np
 
 class FeatureParser(object):
 
-    def __init__(self, args, scenario_params, encoder):
+    def __init__(self, args, scenario_params, encoder, input_field):
         self.args        = args
         self.encoder     = encoder
         self.input_type  = scenario_params["input"]
-        self.input_field = scenario_params["field"]
+        self.input_field = input_field
 
     def _fit_input(self, input_field):
         raise NotImplementedError()
@@ -25,7 +25,7 @@ class FeatureParser(object):
         for sample in samples:
 
             if self.input_field not in sample:
-                raise Exception("{} field not computed for sampled {}"
+                raise Exception("{} field not computed for sample {}"
                                 .format(self.input_field, sample["index"]))
 
             result = self._fit_input(sample[self.input_field])
@@ -78,8 +78,8 @@ class Word2VecParser(FeatureParser):
 
     features_kind = "Word2Vec"
 
-    def __init__(self, args, parser_params, encoder):
-        super().__init__(args, parser_params, encoder)
+    def __init__(self, args, parser_params, encoder, input_field):
+        super().__init__(args, parser_params, encoder, input_field)
 
         self.embeddings = Word2VecEmbedding(args,
                                             input_type=self.input_type,
@@ -113,8 +113,8 @@ class Code2VecParser(FeatureParser):
 
     features_kind = "Code2Vec"
 
-    def __init__(self, args, parser_params, encoder):
-        super().__init__(args, parser_params, encoder)
+    def __init__(self, args, parser_params, encoder, input_field):
+        super().__init__(args, parser_params, encoder, input_field)
         self.params           = args["features"]["types"]["code2vec"]
         self.ignore_path_ends = self.params["ignore_path_ends"]
 
@@ -181,8 +181,8 @@ class SafeParser(FeatureParser):
 
     features_kind = "SAFE"
 
-    def __init__(self, args, parser_params, encoder):
-        super().__init__(args, parser_params, encoder)
+    def __init__(self, args, parser_params, encoder, input_field):
+        super().__init__(args, parser_params, encoder, input_field)
 
     def _fit_input(self, input_field):
         return input_field

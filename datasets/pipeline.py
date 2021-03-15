@@ -32,7 +32,8 @@ class SourcePipeline(object):
 
             parser   = self.handlers[embedding_type](self.args,
                                                      scenario_params,
-                                                     encoder_params)
+                                                     encoder_params,
+                                                     input_kind["field"])
             self.steps.append(parser)
 
         return self

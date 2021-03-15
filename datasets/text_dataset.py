@@ -7,7 +7,7 @@ import re
 from tqdm import tqdm
 import unicodedata
 from collections import defaultdict
-from nltk import sent_tokenize
+from nltk import sent_tokenize, word_tokenize
 
 
 class TextDataset(Dataset):
@@ -430,7 +430,14 @@ class TextDataset(Dataset):
         delims = [".", "?", "!", ",", ";"]
         for delim in delims:
             content = content.replace(delim, " {} ".format(delim))
-        return sent_tokenize(content)
+        return content
+
+    stopwords = {"the", "of", "to", "and", "is", "that", "it", "with"}
+
+    @staticmethod
+    def filter_sentence(sentence):
+        return [x.lower() for x in word_tokenize(sentence)
+                if len(x) >= 1 and x.lower() not in TextDataset.stopwords]
 
     def prepare_problem(self, sample):
 
@@ -442,7 +449,17 @@ class TextDataset(Dataset):
         for field in self.fields:
             for fun in pipeline:
                 sample[field] = fun(content=sample[field], sample=sample)
-            sample["sentences"][field] = TextDataset._split_content(sample[field])
+
+            content = sample[field]
+
+            if "formulas_idx" in sample:
+                for formula_idx in sample["formulas_idx"]:
+                    pattern = " {} ".format(sample["formulas_idx"][formula_idx])
+                    content = content.replace(formula_idx, pattern)
+
+            content      = TextDataset._split_content(content)
+            preprocessed = TextDataset.filter_sentence(content)
+            sample["{}_pre".format(field)] = preprocessed
 
         return sample
 

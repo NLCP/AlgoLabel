@@ -72,15 +72,14 @@ class Word2VecEmbedding(Embedding):
             inputs = []
             for sample in X:
                 for field in self.input_fields:
-                    if not field in sample:
-                        print(sample)
-                        exit(0)
-                    inputs.append(sample[field])
+                    target = "{}_pre".format(field)
+                    if target not in sample:
+                        raise Exception("Field {} not available, you must run --preprocess first.".format(target))
+                    inputs.append(sample[target])
         else:
             inputs = [sample[self.input_field] for sample in X]
 
         logging.info("Number of samples: {}!".format(len(inputs)))
-
         np.random.shuffle(inputs)
 
         self.model = Word2Vec(inputs,

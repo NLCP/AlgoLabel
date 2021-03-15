@@ -9,13 +9,15 @@
     "enable_formatter": false
   },
   "prepare": {
-    "handler": "SourceDataset",
+    "handler": "TextDataset",
     "text": {
       "fields": {
         "statement": true,
         "input": true,
         "output": true
-      }
+      },
+      "parse_digits": true,
+      "parse_formulas": true
     },
     "source": {
       "min_num_lines": 300,
@@ -39,12 +41,12 @@
     ],
     "difficulty_based": true
   },
-  "load_weights_from_epoch": 2,
-  "model": "AlgoCode_C2V",
+  "load_weights_from_epoch": false,
+  "model": "AlgoNet",
   "features": {
     "types": {
       "word2vec": {
-        "size": 128,
+        "size": 100,
         "window": 5,
         "min_count": 3,
         "workers": 32
@@ -221,7 +223,7 @@
         "inputs": [
           {
             "scenario": "word2vec_code",
-            "field": "code",
+            "field": "tokens",
             "encoder": "lstm"
           },
           {
@@ -231,8 +233,40 @@
           },
           {
             "scenario": "code2vec",
-            "encoder": "ast_lstm",
-            "field": "paths"
+            "field": "code2vec",
+            "encoder": "ast_lstm"
+          }
+        ],
+        "join_operation": "default"
+      },
+      "classifiers": [
+        "default_dense",
+        "cherry"
+      ],
+      "loss": "binary_crossentropy",
+      "optimizer": "adam",
+      "metrics": [
+        "accuracy"
+      ]
+    },
+    "AlgoNet": {
+      "encoders": {
+        "input_type": "code",
+        "inputs": [
+          {
+            "scenario": "word2vec_text",
+            "field": "statement_pre",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "word2vec_text",
+            "field": "input_pre",
+            "encoder": "lstm"
+          },
+          {
+            "scenario": "word2vec_text",
+            "field": "output_pre",
+            "encoder": "lstm"
           }
         ],
         "join_operation": "default"

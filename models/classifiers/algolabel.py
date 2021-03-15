@@ -162,7 +162,7 @@ class AlgoLabel(Model):
         encoder_params = self.args["encoders"][encoder_name]
         scenario       = self.args["features"]["scenarios"][input_params["scenario"]]
         emb_input      = scenario["input"]
-        emb_field      = scenario["field"]
+        emb_field      = input_params["field"]
         max_seq_len    = encoder_params["max_seq_len_{}".format(emb_input)]
 
         layer         = Input(shape=(max_seq_len,), name="{}_encoder".format(emb_field))
