@@ -385,45 +385,6 @@ class SourceDataset(Dataset):
                     result.append(solution)
         return result
 
-    # @fcall
-    # def split_data(self, verbose=True):
-    #
-    #     '''
-    #     Split dataset in separate training/validation/test datasets.
-    #     Solutions belonging to the same problem are split together.
-    #     :return:
-    #     '''
-    #
-    #     params  = self.args["split"]
-    #     labels  = params["labels"]
-    #
-    #     np.random.shuffle(self.data)
-    #
-    #     labeled, unlabeled = self.separate_unlabeled_samples(labels)
-    #
-    #     if params["difficulty_based"]:
-    #         distribution = self.split_on_difficulty(labeled)
-    #         dataset = distribution["Easy"] + distribution["Medium"] + distribution["Hard"]
-    #         train, dev, test = self.split_stratified(dataset)
-    #         train += distribution["Various"]
-    #     else:
-    #         train, dev, test = self.split_stratified(labeled)
-    #
-    #     data_split = {
-    #         "train": self.flatten_solutions(train),
-    #         "dev": self.flatten_solutions(dev),
-    #         "test": self.flatten_solutions(test),
-    #         "unlabeled": self.flatten_solutions(unlabeled)
-    #     }
-    #
-    #     if verbose:
-    #         for split in data_split:
-    #             if split != "unlabeled":
-    #                 logging.info("Stats for the {} data split:".format(split))
-    #                 self.compute_tag_distribution(data_split[split])
-    #
-    #     return data_split
-
     def _extract_ast(self, sources_path, result_path, force_rewrite=False):
 
         params        = self.args["features"]["types"]["code2vec"]
@@ -489,6 +450,8 @@ class SourceDataset(Dataset):
                     "path_index": path[1],
                     "end": path[2]
                 })
+
+            index = index.split(os.path.sep)[-1][:-4]
             file_paths[index] = all_paths
 
         result["file_paths"] = file_paths
@@ -596,10 +559,9 @@ def match_ast_data(fold_data, train_data):
 
     result = {}
 
-    for file_index in fold_data["file_paths"]:
+    for sample_index in fold_data["file_paths"]:
 
-        all_paths    = fold_data["file_paths"][file_index]
-        sample_index = file_index.split("\\")[-1][:-4]
+        all_paths            = fold_data["file_paths"][sample_index]
         result[sample_index] = []
 
         logging.debug("Investigating {}".format(sample_index))
@@ -650,9 +612,8 @@ def save_code2vec_index(dataset, path_index, fold_label):
 
     if fold_label == "train":
         meta = {}
-        for file_index in path_index["file_paths"]:
-            sample_index       = file_index.split("\\")[-1][:-4]
-            meta[sample_index] = path_index["file_paths"][file_index]
+        for sample_index in path_index["file_paths"]:
+            meta[sample_index] = path_index["file_paths"][sample_index]
         path_index = meta
 
     for sample in dataset:
